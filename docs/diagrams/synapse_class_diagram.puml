@@ -1,0 +1,446 @@
+@startuml SynapsePortal_ClassDiagram
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam ArrowColor #333333
+skinparam ClassBorderColor #333333
+skinparam ClassBackgroundColor #FFFFFF
+skinparam ClassHeaderBackgroundColor #FFFFFF
+skinparam ClassFontStyle bold
+skinparam linetype ortho
+skinparam dpi 180
+hide empty members
+
+'User (CORE)
+
+abstract class User <<abstract>> {
+  - id: String
+  - name: String
+  - email: String
+  - password: String
+  + login(): void
+  + logout(): void
+  + sendMessage(e: Employee): void
+  + getNotifications(): List
+}
+
+abstract class Employee <<abstract>> {
+  - position: String
+  - salary: double
+  - school: School
+  + viewSchedule(): void
+}
+
+'ENUMS
+
+enum School <<enumeration>> {
+  SITE
+  BS
+  ISE
+  KMA
+  OAG
+  SGE
+  SAM
+  SCHE
+}
+
+enum GraduateDegree <<enumeration>> {
+  MASTER
+  PHD
+}
+
+enum TeacherPosition <<enumeration>> {
+  TUTOR
+  LECTOR
+  SENIOR_LECTOR
+  PROFESSOR
+}
+
+enum ManagerType <<enumeration>> {
+  OR
+  DEPARTMENT
+}
+
+enum CourseType <<enumeration>> {
+  MAJOR
+  MINOR
+  FREE_ELECTIVE
+}
+
+enum LessonType <<enumeration>> {
+  LECTURE
+  PRACTICE
+}
+
+enum UrgencyLevel <<enumeration>> {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum RequestStatus <<enumeration>> {
+  NEW
+  VIEWED
+  ACCEPTED
+  REJECTED
+  DONE
+}
+
+enum EventType <<enumeration>> {
+  EXAM
+  DEADLINE
+  MEETING
+}
+
+enum CitationFormat <<enumeration>> {
+  PLAIN_TEXT
+  BIBTEX
+}
+
+enum Language <<enumeration>> {
+  KZ
+  EN
+  RU
+}
+
+'STUDENTS
+
+class Student {
+  - credits: int
+  - gpa: double
+  - status: String
+  - school: School
+  + registerCourse(c: Course): void
+  + viewCourses(): void
+  + viewMarks(): void
+  + getTranscript(): void
+  + viewAttendance(): void
+  + viewSchedule(): void
+  + rateTeacher(t: Teacher, rating: int): void
+  + viewTeacherInfo(t: Teacher): void
+  + joinOrganization(): void
+  + subscribeToJournal(): void
+}
+
+Student --> School : <<use>>
+
+class GraduateStudent {
+  - degree: GraduateDegree
+  - diplomaProjects: List
+}
+
+GraduateStudent --> GraduateDegree : <<use>>
+
+'  EMPLOYEES
+
+class Teacher {
+  - position: TeacherPosition
+  - rating: double
+  - school: School
+  + viewCourses(): void
+  + manageCourse(c: Course): void
+  + putMark(s: Student, m: Mark): void
+  + viewStudents(): void
+  + viewStudentInfo(s: Student): void
+  + sendComplaint(urgency: UrgencyLevel): void
+  + markAttendance(l: Lesson): void
+  + generateCourseReport(): String
+}
+
+Teacher --> TeacherPosition : <<use>>
+Teacher --> School : <<use>>
+
+
+class Admin {
+  + manageUsers(): void
+  + addUser(u: User): void
+  + removeUser(u: User): void
+  + updateUser(u: User): void
+  + viewLogs(): void
+  + banUser(u: User): void
+  + resetPassword(u: User): void
+  + manageRoles(u: User): void
+}
+
+class Manager {
+  - type: ManagerType
+  - school: School
+  + assignCourse(t: Teacher, c: Course): void
+  + approveRegistration(s: Student): void
+  + rejectRegistration(s: Student): void
+  + addCourse(c: Course, major: School, year: int): void
+  + generateReport(): String
+  + manageNews(): void
+  + viewStudentsBySchool(s: School): void
+  + viewTeachersBySchool(s: School): void
+  + viewStudentsSortedByGpa(): void
+  + viewStudentsSortedByName(): void
+  + viewEmployeeRequests(): void
+}
+
+Manager --> ManagerType : <<use>>
+Manager --> School : <<use>>
+
+class TechSupportSpecialist {
+  + viewRequests(): List
+  + accept(r: Request): void
+  + reject(r: Request): void
+  + done(r: Request): void
+}
+
+' RESEARCHER
+
+interface Researcher <<interface>> {
+  + calculateHIndex(): int
+  + printPapers(c: Comparator): void
+  + addPaper(p: ResearchPaper): void
+  + getProjects(): List
+}
+
+class ResearcherDecorator <<decorator>> {
+  - wrappedUser: User
+  - papers: List
+  - projects: List
+  - hIndex: int
+  + calculateHIndex(): int
+  + printPapers(c: Comparator): void
+  + addPaper(p: ResearchPaper): void
+  + getProjects(): List
+}
+
+class ResearchPaper {
+  - title: String
+  - authors: List
+  - journal: String
+  - citations: int
+  - date: String
+  - doi: String
+  - pages: int
+  + getCitation(f: CitationFormat): String
+}
+
+ResearchPaper --> CitationFormat : <<use>>
+
+class ResearchProject {
+  - topic: String
+  - participants: List
+  - publishedPapers: List
+  + addParticipant(u: User): void
+}
+
+' ACADEMIC
+
+class Course {
+  - name: String
+  - credits: int
+  - type: CourseType
+  - school: School
+  - year: int
+  - maxStudents: int
+  - prerequisites: List
+  + getCourseStatistics(): CourseStatistics
+}
+
+Course --> CourseType : <<use>>
+Course --> School : <<use>>
+
+class Lesson {
+  - type: LessonType
+  - date: String
+  - time: String
+  - room: String
+}
+
+Lesson --> LessonType : <<use>>
+
+class Mark {
+  - att1: double
+  - att2: double
+  - finalMark: double
+  + getTotal(): double
+  + getLetterGrade(): String
+  + isPassed(): boolean
+}
+
+class Schedule {
+  - entries: List
+  + addLesson(l: Lesson, day: String, room: String): void
+  + getByDay(d: String): List
+  + checkRoomConflict(): boolean
+}
+
+class Attendance {
+  - records: Map
+  + getAttendanceRate(): double
+  + markPresent(s: Student): void
+  + markAbsent(s: Student): void
+}
+
+class CourseStatistics {
+  - avgGpa: double
+  - passRate: double
+  - failRate: double
+  - topStudents: List
+  + generateReport(): String
+  + getGradeDistribution(): Map
+}
+
+' NEWS/JOURNAL - Observer Pattern
+
+interface JournalObserver <<interface>> {
+  + update(n: News): void
+}
+
+class Journal <<subject>> {
+  - topic: String
+  - comments: List
+  - observers: List
+  + addObserver(o: JournalObserver): void
+  + notifyObservers(n: News): void
+  + publish(n: News): void
+}
+
+class News {
+  - topic: String
+  - content: String
+  - isPinned: boolean
+  - comments: List
+}
+
+' MESSAGES, EVENTS, REQUESTS
+
+class Message {
+  - sender: User
+  - receiver: User
+  - text: String
+}
+
+class Complaint {
+  - urgency: UrgencyLevel
+  - toDean: boolean
+  - text: String
+}
+
+Complaint --> UrgencyLevel : <<use>>
+
+class Notification {
+  - text: String
+  - isRead: boolean
+}
+
+class Event {
+  - type: EventType
+  - date: String
+  - description: String
+}
+
+Event --> EventType : <<use>>
+
+class Request {
+  - description: String
+  - status: RequestStatus
+  - signedBy: String
+}
+
+Request --> RequestStatus : <<use>>
+
+class StudentOrganization {
+  - name: String
+  - members: List
+  - leader: Student
+}
+
+' INFRASTRUCTURE
+
+class Database <<singleton>> {
+  - instance: Database
+  - users: List
+  - courses: List
+  - papers: List
+  + getInstance(): Database
+  + save(): void
+  + load(): void
+}
+
+class UserFactory <<factory>> {
+  + createUser(role: String, school: School): User
+}
+
+UserFactory --> School : <<use>>
+
+class LanguageManager {
+  - language: Language
+  + getString(key: String): String
+  + switchLanguage(l: Language): void
+}
+
+LanguageManager --> Language : <<use>>
+
+' EXCEPTIONS
+
+class MaxCreditsException <<exception>>
+class LowHIndexException <<exception>>
+class NotResearcherException <<exception>>
+class AuthenticationException <<exception>>
+class CourseFailLimitException <<exception>>
+
+Student ..> MaxCreditsException : <<throw>>
+Student ..> CourseFailLimitException : <<throw>>
+ResearchProject ..> NotResearcherException : <<throw>>
+ResearcherDecorator ..> LowHIndexException : <<throw>>
+Database ..> AuthenticationException : <<throw>>
+
+' INHERITANCE
+
+User <|-- Student
+User <|-- Employee
+Student <|-- GraduateStudent
+Employee <|-- Teacher
+Employee <|-- Admin
+Employee <|-- Manager
+Employee <|-- TechSupportSpecialist
+
+' REALIZATION
+
+Researcher <|.. ResearcherDecorator
+Researcher <|.. Teacher
+Researcher <|.. GraduateStudent
+JournalObserver <|.. User
+
+' DECORATOR
+
+ResearcherDecorator "1" o-- "1" User : wraps
+
+' COMPOSITION
+
+Course "1" *-- "1..*" Lesson
+Course "1" *-- "1" CourseStatistics
+Lesson "1" *-- "1" Attendance
+Student "1" *-- "0..*" Mark
+Journal "1" *-- "0..*" News
+ResearcherDecorator "1" *-- "0..*" ResearchPaper
+
+'  AGGREGATION — часть живёт отдельно
+
+ResearchProject "1" o-- "1..*" Researcher : participants
+ResearchProject "1" o-- "0..*" ResearchPaper
+Journal "1" o-- "0..*" JournalObserver
+TechSupportSpecialist "1" o-- "0..*" Request
+StudentOrganization "1" o-- "1..*" Student : members
+
+' ASSOCIATION
+
+Student "0..*" -- "0..*" Course : registers
+Teacher "1..*" -- "0..*" Course : teaches
+GraduateStudent "0..*" --> "1" Researcher : supervisor
+
+' DEPENDENCY
+
+Database ..> User : <<use>>
+Database ..> Course : <<use>>
+Database ..> ResearchPaper : <<use>>
+UserFactory ..> User : <<create>>
+
+User "1" -- "0..*" Message : sends/receives
+User "1" -- "0..*" Notification : receives
+
+@enduml
