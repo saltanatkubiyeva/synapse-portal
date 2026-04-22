@@ -1,4 +1,4 @@
--@startuml SynapsePortal_UseCaseDiagram
+@startuml SynapsePortal_UseCaseDiagram
 
 skinparam actorStyle awesome
 skinparam defaultFontSize 12
@@ -26,17 +26,10 @@ skinparam rectangle {
   FontStyle bold
 }
 
-skinparam note {
-  BackgroundColor #FFFFEE
-  BorderColor #AAAAAA
-}
-
 skinparam dpi 180
 left to right direction
 
-' ══════════════════════════════════
-'  АКТОРЫ
-' ══════════════════════════════════
+' ACTORS
 
 actor "Student" as S
 actor "Graduate\nStudent" as GS
@@ -46,27 +39,22 @@ actor "Manager" as M
 actor "Admin" as A
 actor "TechSupport\nSpecialist" as TS
 
-' GraduateStudent = Student + Researcher
+' GraduateStudent is a Student AND a Researcher
 GS --|> S
 GS --|> R
 
-' Teacher может быть Researcher
-T --|> R
+' SYSTEM BOUNDARY
 
-' ══════════════════════════════════
-'  СИСТЕМНАЯ ГРАНИЦА
-' ══════════════════════════════════
+rectangle "Synapse Portal - University Management System" {
 
-rectangle "Synapse Portal — University Management System" {
-
-  ' ─── AUTH ───
+  ' AUTH
   package "Authentication" {
     usecase "Login / Logout" as LOGIN
     usecase "Hash password" as HASH
   }
   LOGIN ..> HASH : <<include>>
 
-  ' ─── STUDENT ───
+  ' STUDENT
   package "Student" {
     usecase "View available courses\n(MAJOR / MINOR / FREE ELECTIVE)" as S1
     usecase "Register for course" as S2
@@ -76,18 +64,18 @@ rectangle "Synapse Portal — University Management System" {
     usecase "Get transcript (.txt)" as S6
     usecase "View attendance (%)" as S7
     usecase "View schedule" as S8
-    usecase "Rate teacher (1–5)" as S9
+    usecase "Rate teacher (1-5)" as S9
     usecase "Join / lead\nstudent organization" as S10
     usecase "Subscribe to journal\n& get notifications" as S11
 
-    usecase "Check credit limit\n≤ 21 credits" as S2a
-    usecase "Check fail limit\n≤ 3 attempts" as S2b
+    usecase "Check credit limit\n<= 21 credits" as S2a
+    usecase "Check fail limit\n<= 3 attempts" as S2b
   }
 
   S2 ..> S2a : <<include>>
   S2 ..> S2b : <<include>>
 
-  ' ─── TEACHER ───
+  ' TEACHER
   package "Teacher" {
     usecase "View own courses" as T1
     usecase "Manage course\n(add / edit lessons)" as T2
@@ -99,7 +87,7 @@ rectangle "Synapse Portal — University Management System" {
     usecase "Generate course\nperformance report" as T8
   }
 
-  ' ─── RESEARCHER ───
+  ' RESEARCHER
   package "Researcher" {
     usecase "Add research paper\n(title, authors, doi...)" as R1
     usecase "Calculate h-index" as R2
@@ -108,7 +96,7 @@ rectangle "Synapse Portal — University Management System" {
     usecase "Create / join\nresearch project" as R5
     usecase "Publish paper" as R6
 
-    usecase "Check h-index ≥ 3\n(supervisor role)" as R2a
+    usecase "Check h-index >= 3\n(supervisor role)" as R2a
     usecase "Auto-generate News" as R6a
     usecase "Notify journal\nsubscribers (Observer)" as R6b
     usecase "Pin Research\nnews automatically" as R6c
@@ -119,7 +107,7 @@ rectangle "Synapse Portal — University Management System" {
   R6a ..> R6b : <<include>>
   R6a ..> R6c : <<include>>
 
-  ' ─── MANAGER ───
+  ' MANAGER
   package "Manager" {
     usecase "Assign teacher\nto course" as M1
     usecase "Approve / reject\nstudent registration" as M2
@@ -132,7 +120,7 @@ rectangle "Synapse Portal — University Management System" {
     usecase "View employee requests\n(signed by Dean/Rector)" as M9
   }
 
-  ' ─── ADMIN ───
+  ' ADMIN
   package "Admin" {
     usecase "Add user" as A1
     usecase "Remove user" as A2
@@ -143,15 +131,15 @@ rectangle "Synapse Portal — University Management System" {
     usecase "Manage roles" as A7
   }
 
-  ' ─── TECH SUPPORT ───
+  ' TECH SUPPORT
   package "TechSupport" {
-    usecase "View new requests\n(NEW → VIEWED)" as TS1
-    usecase "Accept request\n(VIEWED → ACCEPTED)" as TS2
-    usecase "Reject request\n(VIEWED → REJECTED)" as TS3
-    usecase "Complete request\n(ACCEPTED → DONE)" as TS4
+    usecase "View new requests\n(NEW -> VIEWED)" as TS1
+    usecase "Accept request\n(VIEWED -> ACCEPTED)" as TS2
+    usecase "Reject request\n(VIEWED -> REJECTED)" as TS3
+    usecase "Complete request\n(ACCEPTED -> DONE)" as TS4
   }
 
-  ' ─── СИСТЕМА (авто) ───
+  ' SYSTEM AUTO (no actor)
   package "System (auto)" {
     usecase "Serialize Database\non exit" as SYS1
     usecase "Deserialize Database\non startup" as SYS2
@@ -159,9 +147,7 @@ rectangle "Synapse Portal — University Management System" {
 
 }
 
-' ══════════════════════════════════
-'  СВЯЗИ
-' ══════════════════════════════════
+' CONNECTIONS
 
 ' Auth
 S  --> LOGIN
@@ -226,40 +212,5 @@ TS --> TS1
 TS --> TS2
 TS --> TS3
 TS --> TS4
-
-' ══════════════════════════════════
-'  ПРИМЕЧАНИЯ
-' ══════════════════════════════════
-
-note right of GS
-  PhD / Master →
-  always Researcher.
-  Inherits all Student
-  and Researcher cases.
-end note
-
-note right of T
-  Professor → always
-  Researcher.
-  Other positions can
-  become Researcher via
-  ResearcherDecorator.
-end note
-
-note bottom of R
-  Any User can become Researcher
-  via <<decorator>> pattern —
-  without changing their class.
-  (e.g. a non-teaching employee)
-end note
-
-note bottom of M3
-  Manager belongs to a School
-  (SITE, BS, OAG, etc).
-  Can only manage courses
-  within their own school.
-  MAJOR/MINOR course of one school
-  can be FREE_ELECTIVE for another.
-end note
 
 @enduml

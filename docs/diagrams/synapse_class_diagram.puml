@@ -128,6 +128,18 @@ class GraduateStudent {
   - diplomaProjects: List
 }
 
+class TeachingAssistant {
+  - course: Course
+  + assistLesson(l: Lesson): void
+  + gradeHomework(): void
+}
+
+note right of GraduateStudent
+  Always wrapped in ResearcherDecorator.
+  Supervisor: Researcher (h-index >= 3).
+  TeachingAssistant role via composition.
+end note
+
 GraduateStudent --> GraduateDegree : <<use>>
 
 '  EMPLOYEES
@@ -402,8 +414,6 @@ Employee <|-- TechSupportSpecialist
 ' REALIZATION
 
 Researcher <|.. ResearcherDecorator
-Researcher <|.. Teacher
-Researcher <|.. GraduateStudent
 JournalObserver <|.. User
 
 ' DECORATOR
@@ -432,7 +442,8 @@ StudentOrganization "1" o-- "1..*" Student : members
 Student "0..*" -- "0..*" Course : registers
 Teacher "1..*" -- "0..*" Course : teaches
 GraduateStudent "0..*" --> "1" Researcher : supervisor
-
+GraduateStudent "1" o-- "0..1" TeachingAssistant : optional role
+UserFactory ..> ResearcherDecorator : <<create>>
 ' DEPENDENCY
 
 Database ..> User : <<use>>
