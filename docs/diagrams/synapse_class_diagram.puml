@@ -55,10 +55,6 @@ enum TeacherPosition <<enumeration>> {
   PROFESSOR
 }
 
-enum ManagerType <<enumeration>> {
-  OR
-  DEPARTMENT
-}
 
 enum CourseType <<enumeration>> {
   MAJOR
@@ -173,24 +169,28 @@ class Admin {
   + manageRoles(u: User): void
 }
 
-class Manager {
-  - type: ManagerType
-  - school: School
-  + assignCourse(t: Teacher, c: Course): void
+abstract class Manager {
   + approveRegistration(s: Student): void
   + rejectRegistration(s: Student): void
-  + addCourse(c: Course, major: School, year: int): void
   + generateReport(): String
   + manageNews(): void
-  + viewStudentsBySchool(s: School): void
-  + viewTeachersBySchool(s: School): void
-  + viewStudentsSortedByGpa(): void
-  + viewStudentsSortedByName(): void
   + viewEmployeeRequests(): void
 }
 
-Manager --> ManagerType : <<use>>
-Manager --> School : <<use>>
+class SchoolManager {
+  - school: School
+  + assignCourse(t: Teacher, c: Course): void
+  + addCourse(c: Course, major: School, year: int): void
+  + viewStudentsBySchool(s: School): void
+  + viewTeachersBySchool(s: School): void
+}
+
+class RegistrarManager {
+  + viewStudentsSortedByGpa(): void
+  + viewStudentsSortedByName(): void
+}
+
+SchoolManager --> School : <<use>>
 
 class TechSupportSpecialist {
   + viewRequests(): List
@@ -409,7 +409,10 @@ Student <|-- GraduateStudent
 Employee <|-- Teacher
 Employee <|-- Admin
 Employee <|-- Manager
+Manager <|-- SchoolManager
+Manager <|-- RegistrarManager
 Employee <|-- TechSupportSpecialist
+
 
 ' REALIZATION
 
