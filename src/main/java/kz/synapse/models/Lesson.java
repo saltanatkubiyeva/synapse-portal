@@ -1,60 +1,47 @@
-package kz.synapse.models;
+ package kz.synapse.models;
 
-import kz.synapse.enums.LessonType;
+import kz.synapse.enums.LessonType; // LECTURE/PRACTICE
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class Lesson {
+
+    private Course course;
+    private Teacher teacher;
     private LessonType type;
-    private LocalDate date;
-    private String time;
     private String room;
+    private LocalDate date;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private Attendance attendance;
 
-    public Lesson(LessonType type, LocalDate date, String time, String room) {
+    public Lesson(Course course, Teacher teacher, LessonType type,
+                  LocalDate date, LocalTime startTime, LocalTime endTime, String room) {
+        this.course = course;
+        this.teacher = teacher;
         this.type = type;
         this.date = date;
-        this.time = time;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.room = room;
-        this.attendance = new Attendance();
+
+        this.attendance = new Attendance(course);
     }
 
-    public LessonType getType() {
-        return type;
-    }
+    public Course getCourse() { return course; }
+    public Teacher getTeacher() { return teacher; }
+    public LessonType getType() { return type; }
 
-    public void setType(LessonType type) {
-        this.type = type;
-    }
+    public LocalDate getDate() { return date; }
+    public LocalTime getStartTime() { return startTime; }
+    public LocalTime getEndTime() { return endTime; }
 
-    public LocalDate getDate() {
-        return date;
-    }
+    public String getRoom() { return room; }
+    public Attendance getAttendance() { return attendance; }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public String getRoom() {
-        return room;
-    }
-
-    public void setRoom(String room) {
-        this.room = room;
-    }
-
-    public Attendance getAttendance() {
-        return attendance;
-    }
-
-    public void setAttendance(Attendance attendance) {
-        this.attendance = attendance;
+    @Override
+    public String toString() {
+        return String.format("Lesson{%s - %s, Date: %s, Time: %s-%s, Room: %s, Teacher: %s}",
+                course.getCourseCode(), type, date, startTime, endTime, room, teacher.getName());
     }
 }

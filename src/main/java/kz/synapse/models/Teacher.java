@@ -1,60 +1,113 @@
 package kz.synapse.models;
 
-import kz.synapse.enums.School;
-import kz.synapse.enums.TeacherPosition;
-import kz.synapse.enums.UrgencyLevel;
+import kz.synapse.enums.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
+import java.util.Set;
+import kz.synapse.database.Database;
 public class Teacher extends Employee {
+
     private TeacherPosition position;
-    private double rating;
-    private List<Course> courses;
+    private School school;
+    private List<Course> courses = new ArrayList<>();
 
-    public Teacher(Long id, String name, String email, String password, double salary, School school) {
-        super(id, name, email, password, "Teacher", salary, school);
-        this.rating = 0.0;
-    }
+    private List<Integer> ratingScores = new ArrayList<>();
 
-    public void putMark(Student student, Mark mark) {
-    }
-
-    public void viewStudents() {
-    }
-
-    public void sendComplaint(UrgencyLevel urgencyLevel) {
-    }
-
-    public String generateCourseReport() {
-        return "";
-    }
-
-    public void markAttendance(Lesson lesson) {
-    }
-
-    public void manageCourse(Course course) {
-    }
-
-    public TeacherPosition getPosition() {
-        return position;
-    }
-
-    public void setPosition(TeacherPosition position) {
+    public Teacher(String id, String name, String email, String password,
+                   Language language, double salary, TeacherPosition position, School school) {
+        super(id, name, email, password, language, salary);
         this.position = position;
+        this.school = school;
+    }
+
+    public void putMark(Student student, Course course, Mark mark) {
+        if (!courses.contains(course)) {
+            throw new IllegalArgumentException("You don't teach this course!");
+        }
+        student.getMarks().put(course, mark);
+    }
+
+    public Set<Student> viewAllStudents() {
+        Set<Student> allStudents = new HashSet<>();
+        for (Course c : courses) {
+            allStudents.addAll(c.getStudents());
+        }
+        return allStudents;
+    }
+
+    public List<Student> viewStudents(Course course) {
+        if (courses.contains(course)) {
+            return course.getStudents();
+        }
+        return new ArrayList<>();
+    }
+
+    public void sendComplaint(List<Student> students,
+                              UrgencyLevel urgency,
+                              String reason) {
+        Complaint complaint = new Complaint(this, students, urgency, reason);
+        Database.getInstance().addComplaint(complaint);
+
+        Dean dean = Database.getInstance()
+                .getDeanBySchool(this.getSchool());
+        if (dean != null)
+            dean.receiveComplaint(complaint);
+
+        logAction("Sent complaint, urgency: " + urgency);
+    }
+
+    public void markAttendance(Lesson lesson, Student student, boolean isPresent) {
+        if (!courses.contains(lesson.getCourse()))
+            throw new IllegalArgumentException("Not your course!");
+
+        if (isPresent)
+            lesson.getAttendance().markPresent(lesson.getDate(), student);
+        else
+            lesson.getAttendance().markAbsent(lesson.getDate(), student);
+
+        logAction("Marked " + student.getName()
+                + (isPresent ? " present" : " absent")
+                + " in " + lesson.getCourse().getName());
+    }
+
+    public void markClassAttendance(Lesson lesson, List<Student> presentStudents) {
+        //отметить всех
+    }
+
+    public String generateCourseReport(Course course) {
+        if (!courses.contains(course)) return "Access Denied";
+
+        StringBuilder report = new StringBuilder("Report for " + course.getName() + ":\n");
+        for (Student s : course.getStudents()) {
+            Mark m = s.getMarks().get(course);
+            report.append(s.getName()).append(" - Total: ")
+                    .append(m != null ? m.getTotal() : "No marks yet").append("\n");
+        }
+        return report.toString();
+    }
+
+    public void addRating(int score) {
+        if (score >= 1 && score <= 5) {
+            ratingScores.add(score);
+        }
     }
 
     public double getRating() {
-        return rating;
+        if (ratingScores.isEmpty()) return 0.0;
+        return ratingScores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
     }
 
-    public void setRating(double rating) {
-        this.rating = rating;
+    public TeacherPosition getPosition() { return position; }
+
+    public School getSchool() {
+        return school;
     }
 
-    public List<Course> getCourses() {
-        return courses;
+    public void setSchool(School school) {
+        this.school = school;
     }
 
-    public void setCourses(List<Course> courses) {
-        this.courses = courses;
-    }
+    public void setPosition(TeacherPosition position) { this.position = position; }
+    public List<Course> getCourses() { return courses; }
 }

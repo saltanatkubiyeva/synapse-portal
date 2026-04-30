@@ -1,4 +1,4 @@
-package main.java.kz.synapse.enums;
+package kz.synapse.enums;
 
 public enum NewsType {
     RESEARCH,

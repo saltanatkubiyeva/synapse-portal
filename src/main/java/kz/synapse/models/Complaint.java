@@ -1,58 +1,39 @@
 package kz.synapse.models;
 
 import kz.synapse.enums.UrgencyLevel;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
-public class Complaint {
-    private UrgencyLevel urgency;
-    private boolean toDean;
-    private String text;
-    private Teacher fromTeacher;
+public class Complaint implements Serializable {
+
+    private Teacher sender;
     private List<Student> aboutStudents;
+    private UrgencyLevel urgency;
+    private String reason;
+    private LocalDateTime createdAt;
 
-    public Complaint(String text, UrgencyLevel urgency) {
-        this.text = text;
-        this.urgency = urgency;
-        this.toDean = false;
-    }
-
-    public UrgencyLevel getUrgency() {
-        return urgency;
-    }
-
-    public void setUrgency(UrgencyLevel urgency) {
-        this.urgency = urgency;
-    }
-
-    public boolean isToDean() {
-        return toDean;
-    }
-
-    public void setToDean(boolean toDean) {
-        this.toDean = toDean;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public Teacher getFromTeacher() {
-        return fromTeacher;
-    }
-
-    public void setFromTeacher(Teacher fromTeacher) {
-        this.fromTeacher = fromTeacher;
-    }
-
-    public List<Student> getAboutStudents() {
-        return aboutStudents;
-    }
-
-    public void setAboutStudents(List<Student> aboutStudents) {
+    public Complaint(Teacher sender, List<Student> aboutStudents,
+                     UrgencyLevel urgency, String reason) {
+        this.sender = sender;
         this.aboutStudents = aboutStudents;
+        this.urgency = urgency;
+        this.reason = reason;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // геттеры
+    public Teacher getSender()                { return sender; }
+    public List<Student> getAboutStudents()   { return aboutStudents; }
+    public UrgencyLevel getUrgency()          { return urgency; }
+    public String getReason()                 { return reason; }
+    public LocalDateTime getCreatedAt()       { return createdAt; }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Complaint{from='%s', students=%d, urgency=%s, reason='%s'}",
+                sender.getName(), aboutStudents.size(), urgency, reason
+        );
     }
 }

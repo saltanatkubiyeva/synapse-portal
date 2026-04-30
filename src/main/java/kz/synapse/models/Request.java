@@ -1,12 +1,13 @@
 package kz.synapse.models;
 
 import kz.synapse.enums.RequestStatus;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Request {
+public class Request implements Serializable {
+
     private String description;
     private RequestStatus status;
-    private String signedBy;
     private Employee requester;
     private LocalDateTime createdAt;
 
@@ -17,43 +18,20 @@ public class Request {
         this.createdAt = LocalDateTime.now();
     }
 
-    public String getDescription() {
-        return description;
-    }
+    // геттеры
+    public String getDescription()      { return description; }
+    public RequestStatus getStatus()    { return status; }
+    public Employee getRequester()      { return requester; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    // сеттер
+    public void setStatus(RequestStatus status) { this.status = status; }
 
-    public RequestStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(RequestStatus status) {
-        this.status = status;
-    }
-
-    public String getSignedBy() {
-        return signedBy;
-    }
-
-    public void setSignedBy(String signedBy) {
-        this.signedBy = signedBy;
-    }
-
-    public Employee getRequester() {
-        return requester;
-    }
-
-    public void setRequester(Employee requester) {
-        this.requester = requester;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    @Override
+    public String toString() {
+        return String.format(
+                "Request{description='%s', status=%s, from='%s'}",
+                description, status, requester.getName()
+        );
     }
 }

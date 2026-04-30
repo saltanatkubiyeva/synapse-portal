@@ -1,6 +1,8 @@
 package kz.synapse.models;
 
-public class TeachingAssistant {
+import java.io.Serializable;
+
+public class TeachingAssistant implements Serializable {
     private Course course;
 
     public TeachingAssistant(Course course) {

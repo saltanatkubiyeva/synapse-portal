@@ -1,61 +1,84 @@
 package kz.synapse.services;
 
+import kz.synapse.models.Course;
 import kz.synapse.models.Student;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CourseStatistics {
-    private double avgGpa;
-    private double passRate;
-    private double failRate;
-    private List<Student> topStudents;
 
-    public CourseStatistics() {
-        this.avgGpa = 0.0;
-        this.passRate = 0.0;
-        this.failRate = 0.0;
-    }
+    private Course course;
 
-    public String generateReport() {
-        return "Course Statistics Report:\n" +
-                "Average GPA: " + avgGpa + "\n" +
-                "Pass Rate: " + passRate + "%\n" +
-                "Fail Rate: " + failRate + "%";
-    }
-
-    public Map<String, Integer> getGradeDistribution() {
-        return null;
-    }
-
-    public double getAvgGpa() {
-        return avgGpa;
-    }
-
-    public void setAvgGpa(double avgGpa) {
-        this.avgGpa = avgGpa;
+    public CourseStatistics(Course course) {
+        this.course = course;
     }
 
     public double getPassRate() {
-        return passRate;
-    }
+        List<Student> enrolled = new ArrayList<>(course.getEnrolledStudents());
+        if (enrolled.isEmpty()) return 0.0;
 
-    public void setPassRate(double passRate) {
-        this.passRate = passRate;
+        long passed = enrolled.stream()
+                .filter(s -> s.getMarks().containsKey(course)
+                        && s.getMarks().get(course).isPassed())
+                .count();
+
+        return ((double) passed / enrolled.size()) * 100.0;
     }
 
     public double getFailRate() {
-        return failRate;
+        return 100.0 - getPassRate();
     }
 
-    public void setFailRate(double failRate) {
-        this.failRate = failRate;
+    public double getAvgGpa() {
+        List<Student> enrolled = new ArrayList<>(course.getEnrolledStudents());
+        if (enrolled.isEmpty()) return 0.0;
+
+        return enrolled.stream()
+                .filter(s -> s.getMarks().containsKey(course))
+                .mapToDouble(s -> s.getMarks()
+                        .get(course).getGpaEquivalent())
+                .average()
+                .orElse(0.0);
     }
 
-    public List<Student> getTopStudents() {
-        return topStudents;
+    public Map<String, Long> getGradeDistribution() {
+        return course.getEnrolledStudents().stream()
+                .filter(s -> s.getMarks().containsKey(course))
+                .map(s -> s.getMarks().get(course).getLetterGrade())
+                .collect(Collectors.groupingBy(
+                        grade -> grade, Collectors.counting()
+                ));
     }
 
-    public void setTopStudents(List<Student> topStudents) {
-        this.topStudents = topStudents;
+    // топ студентов по оценке
+    public List<Student> getTopStudents(int limit) {
+        return new ArrayList<>(course.getEnrolledStudents())
+                .stream()
+                .filter(s -> s.getMarks().containsKey(course))
+                .sorted((a, b) -> Double.compare(
+                        b.getMarks().get(course).getTotal(),
+                        a.getMarks().get(course).getTotal()
+                ))
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    public String generateReport() {
+        return String.format(
+                "--- COURSE REPORT: %s ---\n" +
+                        "Total Enrolled: %d\n" +
+                        "Pass Rate: %.1f%%\n" +
+                        "Fail Rate: %.1f%%\n" +
+                        "Average GPA: %.2f\n" +
+                        "Grade Distribution: %s",
+                course.getName(),
+                course.getEnrolledStudents().size(),
+                getPassRate(),
+                getFailRate(),
+                getAvgGpa(),
+                getGradeDistribution()
+        );
     }
 }

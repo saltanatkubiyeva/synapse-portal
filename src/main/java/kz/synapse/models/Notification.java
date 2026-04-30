@@ -1,8 +1,10 @@
 package kz.synapse.models;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Notification {
+public class Notification implements Serializable {
+
     private String text;
     private boolean isRead;
     private LocalDateTime createdAt;
@@ -13,31 +15,19 @@ public class Notification {
         this.createdAt = LocalDateTime.now();
     }
 
-    public void markRead() {
-        this.isRead = true;
-    }
+    // прочитать
+    public void markRead() { this.isRead = true; }
 
-    public String getText() {
-        return text;
-    }
+    // геттеры
+    public String getText()             { return text; }
+    public boolean isRead()             { return isRead; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public boolean isRead() {
-        return isRead;
-    }
-
-    public void setRead(boolean read) {
-        isRead = read;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    @Override
+    public String toString() {
+        return String.format("[%s] %s %s",
+                createdAt,
+                isRead ? "(read)" : "(unread)",
+                text);
     }
 }

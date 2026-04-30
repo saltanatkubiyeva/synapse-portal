@@ -2,111 +2,123 @@ package kz.synapse.models;
 
 import kz.synapse.enums.CourseType;
 import kz.synapse.enums.School;
-import kz.synapse.services.CourseStatistics;
-import java.util.List;
+import kz.synapse.enums.SemesterType;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
-public class Course {
+public class Course implements Serializable {
+
+    private String courseCode;
     private String name;
     private int credits;
-    private CourseType type;
-    private School school;
-    private int year;
+    private CourseType defaultType;
     private int maxStudents;
-    private List<Course> prerequisites;
-    private List<Teacher> teachers;
-    private List<Lesson> lessons;
-    private List<Student> enrolledStudents;
 
-    public Course(String name, int credits, CourseType type, School school, int year, int maxStudents) {
+    private School targetSchool;
+    private int targetYear;
+    private SemesterType semester;
+
+    private Set<Course> prerequisites = new HashSet<>();
+    private Set<Teacher> teachers = new HashSet<>();
+    private Set<Student> enrolledStudents = new HashSet<>();
+
+    public Course(String courseCode, String name, int credits,
+                  CourseType defaultType, int maxStudents) {
+        this.courseCode = courseCode;
         this.name = name;
         this.credits = credits;
-        this.type = type;
-        this.school = school;
-        this.year = year;
+        this.defaultType = defaultType;
         this.maxStudents = maxStudents;
     }
 
-    public CourseStatistics getCourseStatistics() {
-        return new CourseStatistics();
+    public CourseType getCourseTypeFor(Student student) {
+        if (this.targetSchool == null
+                || student.getSchool() == this.targetSchool) {
+            return this.defaultType;
+        }
+
+        if (this.defaultType == CourseType.MAJOR) {
+            return CourseType.FREE_ELECTIVE;
+        }
+
+        return this.defaultType;
     }
 
-    public String getName() {
-        return name;
+    // вызываются менеджерами
+
+    public void addStudent(Student student) {
+        if (!hasAvailableSpots())
+            throw new IllegalStateException(
+                    "Course " + name + " is full"
+            );
+        enrolledStudents.add(student);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void removeStudent(Student student) {
+        enrolledStudents.remove(student);
     }
 
-    public int getCredits() {
-        return credits;
+    public boolean hasAvailableSpots() {
+        return enrolledStudents.size() < maxStudents;
     }
 
-    public void setCredits(int credits) {
-        this.credits = credits;
+    public void addTeacher(Teacher teacher) {
+        teachers.add(teacher);
     }
 
-    public CourseType getType() {
-        return type;
+    public void removeTeacher(Teacher teacher) {
+        teachers.remove(teacher);
     }
 
-    public void setType(CourseType type) {
-        this.type = type;
+    public void addPrerequisite(Course course) {
+        prerequisites.add(course);
     }
 
-    public School getSchool() {
-        return school;
+    public boolean hasPrerequisite(Course course) {
+        return prerequisites.contains(course);
     }
 
-    public void setSchool(School school) {
-        this.school = school;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Course course = (Course) o;
+        return Objects.equals(courseCode, course.courseCode);
     }
 
-    public int getYear() {
-        return year;
+    @Override
+    public int hashCode() {
+        return Objects.hash(courseCode);
     }
 
-    public void setYear(int year) {
-        this.year = year;
+    @Override
+    public String toString() {
+        return String.format(
+                "Course{code='%s', name='%s', credits=%d, " +
+                        "type=%s, semester=%s, school=%s, spots=%d/%d}",
+                courseCode, name, credits, defaultType,
+                semester, targetSchool,
+                enrolledStudents.size(), maxStudents
+        );
     }
 
-    public int getMaxStudents() {
-        return maxStudents;
-    }
+    public String getCourseCode()              { return courseCode; }
+    public String getName()                    { return name; }
+    public int getCredits()                    { return credits; }
+    public CourseType getDefaultType()         { return defaultType; }
+    public int getMaxStudents()                { return maxStudents; }
+    public School getTargetSchool()            { return targetSchool; }
+    public int getTargetYear()                 { return targetYear; }
+    public SemesterType getSemester()          { return semester; }
+    public Set<Course> getPrerequisites()      { return prerequisites; }
+    public Set<Teacher> getTeachers()          { return teachers; }
+    public Set<Student> getEnrolledStudents()  { return enrolledStudents; }
 
-    public void setMaxStudents(int maxStudents) {
-        this.maxStudents = maxStudents;
-    }
-
-    public List<Course> getPrerequisites() {
-        return prerequisites;
-    }
-
-    public void setPrerequisites(List<Course> prerequisites) {
-        this.prerequisites = prerequisites;
-    }
-
-    public List<Teacher> getTeachers() {
-        return teachers;
-    }
-
-    public void setTeachers(List<Teacher> teachers) {
-        this.teachers = teachers;
-    }
-
-    public List<Lesson> getLessons() {
-        return lessons;
-    }
-
-    public void setLessons(List<Lesson> lessons) {
-        this.lessons = lessons;
-    }
-
-    public List<Student> getEnrolledStudents() {
-        return enrolledStudents;
-    }
-
-    public void setEnrolledStudents(List<Student> enrolledStudents) {
-        this.enrolledStudents = enrolledStudents;
-    }
+    public void setTargetSchool(School s)      { this.targetSchool = s; }
+    public void setTargetYear(int year)        { this.targetYear = year; }
+    public void setSemester(SemesterType s)    { this.semester = s; }
+    public void setMaxStudents(int max)        { this.maxStudents = max; }
+    public void setDefaultType(CourseType t)   { this.defaultType = t; }
 }

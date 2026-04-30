@@ -1,16 +1,21 @@
 package kz.synapse.models;
 
+import kz.synapse.enums.NewsType;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class News {
     private String topic;
     private String content;
+    private NewsType type;
     private boolean isPinned;
-    private List<String> comments;
+    private List<String> comments = new ArrayList<>();
 
-    public News(String topic, String content) {
+    public News(String topic, NewsType type) {
         this.topic = topic;
-        this.content = content;
+        this.content = "";
+        this.type = type;
         this.isPinned = false;
     }
 

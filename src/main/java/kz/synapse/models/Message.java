@@ -3,57 +3,27 @@ package kz.synapse.models;
 import java.time.LocalDateTime;
 
 public class Message {
-    private User sender;
-    private User receiver;
+    private Employee sender;
+    private Employee receiver;
     private String text;
-    private LocalDateTime timestamp;
+    private LocalDateTime sentAt;
 
-    public Message(User sender, User receiver, String text) {
+    public Message(Employee sender, Employee receiver, String text) {
         this.sender = sender;
         this.receiver = receiver;
         this.text = text;
-        this.timestamp = LocalDateTime.now();
+        this.sentAt = LocalDateTime.now();
     }
+
+    public Employee getSender() { return sender; }
+    public Employee getReceiver() { return receiver; }
+    public String getText() { return text; }
+    public LocalDateTime getSentAt() { return sentAt; }
 
     @Override
     public String toString() {
-        return "Message{" +
-                "sender=" + sender.getName() +
-                ", receiver=" + receiver.getName() +
-                ", text='" + text + '\'' +
-                ", timestamp=" + timestamp +
-                '}';
+        return String.format("[%s] From %s: %s",
+                sentAt, sender.getName(), text);
     }
 
-    public User getSender() {
-        return sender;
-    }
-
-    public void setSender(User sender) {
-        this.sender = sender;
-    }
-
-    public User getReceiver() {
-        return receiver;
-    }
-
-    public void setReceiver(User receiver) {
-        this.receiver = receiver;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
 }

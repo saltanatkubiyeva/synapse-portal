@@ -1,11 +1,13 @@
 package kz.synapse.models;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-public class StudentOrganization {
+public class StudentOrganization implements Serializable {
     private String name;
-    private List<Student> members;
-    private Student leader;
+    private List<Student> members = new ArrayList<>();
+    private Student head;
 
     public StudentOrganization(String name) {
         this.name = name;
@@ -21,27 +23,17 @@ public class StudentOrganization {
         members.remove(student);
     }
 
-    public void setLeader(Student student) {
-        this.leader = student;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {
-        return name;
-    }
+    public List<Student> getMembers() { return members; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<Student> getMembers() {
-        return members;
-    }
-
-    public void setMembers(List<Student> members) {
-        this.members = members;
-    }
-
-    public Student getLeader() {
-        return leader;
+    public Student getHead() { return head; }
+    public void setHead(Student head) {
+        if (!members.contains(head))
+            throw new IllegalArgumentException(
+                    head.getName() + " is not a member of this organization"
+            );
+        this.head = head;
     }
 }

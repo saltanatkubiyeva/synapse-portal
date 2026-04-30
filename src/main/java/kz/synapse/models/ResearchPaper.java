@@ -1,95 +1,87 @@
 package kz.synapse.models;
 
 import kz.synapse.enums.CitationFormat;
+import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Objects;
 
-public class ResearchPaper implements Comparable<ResearchPaper> {
+public class ResearchPaper implements Serializable {
+
+    // поля
     private String title;
-    private List<String> authors;
+    private String authors;
     private String journal;
-    private int citations;
-    private LocalDate date;
-    private String doi;
     private int pages;
+    private int citations;
+    private LocalDate publishedDate;
+    private String doi;
 
-    public ResearchPaper(String title, List<String> authors, String journal, int citations, LocalDate date, String doi, int pages) {
+    public ResearchPaper(String title, String authors, String journal,
+                         int pages, LocalDate publishedDate, String doi) {
         this.title = title;
         this.authors = authors;
         this.journal = journal;
-        this.citations = citations;
-        this.date = date;
-        this.doi = doi;
         this.pages = pages;
+        this.publishedDate = publishedDate;
+        this.doi = doi;
+        this.citations = 0;
     }
 
+    // citation
     public String getCitation(CitationFormat format) {
         if (format == CitationFormat.PLAIN_TEXT) {
-            return authors + ". " + title + ". " + journal + ", " + date.getYear() + ".";
+            return String.format("%s. (%d). \"%s\". %s. %s",
+                    authors, publishedDate.getYear(), title, journal, doi);
         } else if (format == CitationFormat.BIBTEX) {
-            return "@article{" + doi + ",\n  title={" + title + "},\n  journal={" + journal + "},\n  year={" + date.getYear() + "}\n}";
+            String citeKey = authors.split(",")[0]
+                    .trim()
+                    .replace(" ", "")
+                    + publishedDate.getYear();
+            return String.format(
+                    "@article{%s,\n" +
+                            "  author = {%s},\n" +
+                            "  title = {%s},\n" +
+                            "  journal = {%s},\n" +
+                            "  year = {%d},\n" +
+                            "  pages = {%d},\n" +
+                            "  doi = {%s}\n" +
+                            "}",
+                    citeKey, authors, title, journal,
+                    publishedDate.getYear(), pages, doi);
         }
-        return "";
+        return "Unknown format";
+    }
+
+    // citations
+    public void addCitation() { this.citations++; }
+
+    // equals / hashCode по doi
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ResearchPaper)) return false;
+        ResearchPaper p = (ResearchPaper) o;
+        return Objects.equals(doi, p.doi);
     }
 
     @Override
-    public int compareTo(ResearchPaper other) {
-        return Integer.compare(other.citations, this.citations);
+    public int hashCode() {
+        return Objects.hash(doi);
     }
 
-    public String getTitle() {
-        return title;
+    @Override
+    public String toString() {
+        return String.format(
+                "ResearchPaper{title='%s', citations=%d, pages=%d, published=%s}",
+                title, citations, pages, publishedDate);
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public List<String> getAuthors() {
-        return authors;
-    }
-
-    public void setAuthors(List<String> authors) {
-        this.authors = authors;
-    }
-
-    public String getJournal() {
-        return journal;
-    }
-
-    public void setJournal(String journal) {
-        this.journal = journal;
-    }
-
-    public int getCitations() {
-        return citations;
-    }
-
-    public void setCitations(int citations) {
-        this.citations = citations;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public String getDoi() {
-        return doi;
-    }
-
-    public void setDoi(String doi) {
-        this.doi = doi;
-    }
-
-    public int getPages() {
-        return pages;
-    }
-
-    public void setPages(int pages) {
-        this.pages = pages;
-    }
+    // геттеры
+    public String getTitle()             { return title; }
+    public String getAuthors()           { return authors; }
+    public String getJournal()           { return journal; }
+    public int getPages()                { return pages; }
+    public int getCitations()            { return citations; }
+    public LocalDate getPublishedDate()  { return publishedDate; }
+    public String getDoi()               { return doi; }
 }

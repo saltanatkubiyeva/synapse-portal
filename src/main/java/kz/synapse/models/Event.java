@@ -1,50 +1,42 @@
 package kz.synapse.models;
 
 import kz.synapse.enums.EventType;
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
-public class Event {
+public class Event implements Serializable {
+
+    private String title;
     private EventType type;
     private LocalDate date;
-    private String description;
+    private LocalTime time;
     private String room;
+    private String description;
 
-    public Event(EventType type, LocalDate date, String description, String room) {
+    public Event(String title, EventType type, LocalDate date,
+                 LocalTime time, String room, String description) {
+        this.title = title;
         this.type = type;
         this.date = date;
-        this.description = description;
+        this.time = time;
         this.room = room;
-    }
-
-    public EventType getType() {
-        return type;
-    }
-
-    public void setType(EventType type) {
-        this.type = type;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
     }
 
-    public String getRoom() {
-        return room;
-    }
+    // геттеры
+    public String getTitle()       { return title; }
+    public EventType getType()     { return type; }
+    public LocalDate getDate()     { return date; }
+    public LocalTime getTime()     { return time; }
+    public String getRoom()        { return room; }
+    public String getDescription() { return description; }
 
-    public void setRoom(String room) {
-        this.room = room;
+    @Override
+    public String toString() {
+        return String.format(
+                "Event{title='%s', type=%s, date=%s, time=%s, room='%s'}",
+                title, type, date, time, room
+        );
     }
 }
