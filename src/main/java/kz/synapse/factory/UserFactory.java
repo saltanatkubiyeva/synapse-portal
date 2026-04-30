@@ -13,6 +13,12 @@ public class UserFactory {
         return new Student(id, name, email, password, language, school);
     }
 
+    // обернуть любого User в Researcher
+    public static ResearcherDecorator makeResearcher(User user) {
+        return new ResearcherDecorator(user);
+    }
+
+
     // создать graduate student (всегда researcher)
     public static ResearcherDecorator createGraduateStudent(String id, String name,
                                                             String email, String password,
