@@ -31,15 +31,14 @@ public class Teacher extends Employee {
     public Set<Student> viewAllStudents() {
         Set<Student> allStudents = new HashSet<>();
         for (Course c : courses) {
-            allStudents.addAll(c.getStudents());
+            allStudents.addAll(c.getEnrolledStudents());
         }
         return allStudents;
     }
 
     public List<Student> viewStudents(Course course) {
-        if (courses.contains(course)) {
-            return course.getStudents();
-        }
+        if (courses.contains(course))
+            return new ArrayList<>(course.getEnrolledStudents());
         return new ArrayList<>();
     }
 
@@ -79,7 +78,7 @@ public class Teacher extends Employee {
         if (!courses.contains(course)) return "Access Denied";
 
         StringBuilder report = new StringBuilder("Report for " + course.getName() + ":\n");
-        for (Student s : course.getStudents()) {
+        for (Student s : course.getEnrolledStudents()) {
             Mark m = s.getMarks().get(course);
             report.append(s.getName()).append(" - Total: ")
                     .append(m != null ? m.getTotal() : "No marks yet").append("\n");

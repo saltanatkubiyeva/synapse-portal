@@ -1,5 +1,6 @@
 package kz.synapse.models;
 
+import kz.synapse.database.Database;
 import kz.synapse.interfaces.JournalObserver;
 import kz.synapse.enums.NewsType;
 import java.io.Serializable;
