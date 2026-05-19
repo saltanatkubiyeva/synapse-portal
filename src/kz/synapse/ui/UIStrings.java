@@ -1,8 +1,6 @@
 package kz.synapse.ui;
 
 import kz.synapse.utils.LanguageManager;
-
-/** UI message keys resolved via {@link LanguageManager}. */
 public class UIStrings {
 
     private UIStrings() {}

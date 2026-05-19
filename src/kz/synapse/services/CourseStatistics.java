@@ -6,8 +6,6 @@ import kz.synapse.models.*;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-/** статистика по офферингу */
 public class CourseStatistics {
 
     private final CourseOffering offering;

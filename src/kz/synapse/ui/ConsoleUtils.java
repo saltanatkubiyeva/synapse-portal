@@ -4,13 +4,11 @@ import kz.synapse.utils.LanguageManager;
 
 import java.util.Scanner;
 
-/** утилиты консольного ввода/вывода. */
 public class ConsoleUtils {
 
     private static final Scanner scanner = new Scanner(System.in);
 
     // ввод
-
     public static String readLine(String prompt) {
         System.out.print(prompt);
         return scanner.nextLine().trim();
@@ -39,9 +37,7 @@ public class ConsoleUtils {
             }
         }
     }
-
     // вывод
-
     public static void pressEnter() {
         System.out.print(UIStrings.get("prompt.enter"));
         scanner.nextLine();
