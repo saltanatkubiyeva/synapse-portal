@@ -326,13 +326,13 @@ public class Main {
                 java.time.DayOfWeek.TUESDAY,
                 java.time.LocalTime.of(9, 0),
                 java.time.LocalTime.of(11, 0),
-                "Aud-201", kz.synapse.enums.LessonType.LECTURE,
+                "201", kz.synapse.enums.LessonType.LECTURE,
                 bobur.getInnerUser(), 45));
         siteManager.addSlot(webOff, new LessonSlot(
                 java.time.DayOfWeek.THURSDAY,
                 java.time.LocalTime.of(9, 0),
                 java.time.LocalTime.of(11, 0),
-                "Aud-202", kz.synapse.enums.LessonType.LECTURE,
+                "202", kz.synapse.enums.LessonType.LECTURE,
                 bobur.getInnerUser(), 45));
 
         // Практики —

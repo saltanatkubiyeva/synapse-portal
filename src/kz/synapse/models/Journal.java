@@ -29,8 +29,6 @@ public class Journal implements Serializable {
         this.topic = topic;
     }
 
-    // observer — подписка
-
     public void subscribe(JournalObserver observer) {
         if (!subscribers.contains(observer)) {
             subscribers.add(observer);

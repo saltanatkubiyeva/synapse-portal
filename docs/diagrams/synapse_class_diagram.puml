@@ -1,407 +1,616 @@
-@startuml SynapsePortal_ClassDiagram
+@startuml Synapse_ClassDiagram
+' SYNAPSE — Class Diagram (aligned with src/kz/synapse)
+
 skinparam classAttributeIconSize 0
-skinparam classFontSize 11
+skinparam classFontSize 10
 skinparam ArrowColor #333333
 skinparam ClassBorderColor #333333
 skinparam ClassBackgroundColor #FFFFFF
-skinparam ClassHeaderBackgroundColor #FFFFFF
-skinparam ClassFontStyle bold
-skinparam linetype ortho
+skinparam ClassHeaderBackgroundColor #F5F5F5
+skinparam packageStyle rectangle
 skinparam dpi 180
 hide empty members
 
-'User (CORE)
+' ===================== ENUMS =====================
 
-abstract class User <<abstract>> {
-  - id: String
-  - name: String
-  - email: String
-  - password: String
-  + login(): void
-  + logout(): void
-  + sendMessage(e: Employee): void
-  + getNotifications(): List
+package "kz.synapse.enums" <<Rectangle>> {
+  enum School {
+    SITE
+    BS
+    ISE
+    KMA
+    OAG
+    SGE
+    SAM
+    SCHE
+  }
+  enum Language {
+    EN
+    RU
+    KZ
+  }
+  enum SemesterType {
+    FALL
+    SPRING
+    SUMMER
+  }
+  enum CourseType {
+    MAJOR
+    MINOR
+    FREE_ELECTIVE
+  }
+  enum LessonType {
+    LECTURE
+    PRACTICE
+  }
+  enum AttestationPeriod {
+    ATT1
+    ATT2
+    FINAL
+  }
+  enum RegistrationStatus {
+    PENDING
+    APPROVED
+    REGISTERED
+    REJECTED
+  }
+  enum TeacherPosition {
+    TUTOR
+    LECTOR
+    SENIOR_LECTOR
+    PROFESSOR
+  }
+  enum GraduateDegree {
+    MASTER
+    PHD
+  }
+  enum ManagerType {
+    OR
+    SCHOOL
+  }
+  enum UrgencyLevel {
+    LOW
+    MEDIUM
+    HIGH
+  }
+  enum RequestStatus {
+    NEW
+    VIEWED
+    ACCEPTED
+    REJECTED
+    DONE
+  }
+  enum NewsType {
+    ANNOUNCEMENT
+    RESEARCH
+    EVENT
+  }
+  enum CitationFormat {
+    PLAIN_TEXT
+    BIBTEX
+  }
+  enum EventType {
+    EXAM
+    DEADLINE
+    MEETING
+  }
 }
 
-abstract class Employee <<abstract>> {
-  - position: String
-  - salary: double
-  - school: School
-  + viewSchedule(): void
+' ===================== INTERFACES =====================
+
+package "kz.synapse.interfaces" <<Rectangle>> {
+  interface Researcher {
+    +getName(): String
+    +publishPaper(paper: ResearchPaper): void
+    +getPapers(): List
+    +printPapers(comparator: Comparator): void
+    +calculateHIndex(): int
+    +joinProject(project: ResearchProject): void
+    +getProjects(): List
+  }
+
+  interface JournalObserver {
+    +update(journal: Journal, paper: ResearchPaper): void
+  }
 }
 
-'ENUMS
+' ===================== USER HIERARCHY =====================
 
-enum School <<enumeration>> {
-  SITE
-  BS
-  ISE
-  KMA
-  OAG
-  SGE
-  SAM
-  SCHE
+package "kz.synapse.models — Users" <<Rectangle>> {
+
+  abstract class User <<abstract>> {
+    - id: String
+    - name: String
+    - email: String
+    - password: String
+    - language: Language
+    - isBanned: boolean
+    - notifications: List<Notification>
+    --
+    +subscribeToJournal(j: Journal): void
+    +unsubscribeFromJournal(j: Journal): void
+    +sendTechRequest(desc: String): Request
+    +getNotifications(): List
+    +markAllNotificationsRead(): void
+    #logAction(action: String): void
+  }
+
+  abstract class Employee <<abstract>> {
+    - experienceYears: int
+    - inbox: List<Message>
+    - outbox: List<Message>
+    --
+    +sendMessage(receiver: Employee, text: String): void
+    +getInbox(): List
+    +getOutbox(): List
+  }
+
+  class Student {
+    - semesterCredits: int
+    - gpa: double
+    - status: String
+    - school: School
+    - yearOfStudy: int
+    - transcript: Transcript
+    - chosenSlots: Map
+    --
+    +registerForOffering(offering: CourseOffering): void
+    +chooseSlot(offering, slot): void
+    +viewAvailableOfferings(): List
+    +viewMarks(): void
+    +getTranscript(): String
+    +rateTeacher(teacher, rating): void
+    +joinOrganization(org): void
+    +slotsComplete(offering): boolean
+  }
+
+  class GraduateStudent {
+    - degree: GraduateDegree
+    - supervisor: Researcher
+    - teachingAssistant: TeachingAssistant
+    --
+    +setSupervisor(supervisor: Researcher): void
+    +isTA(): boolean
+    +getTeachingAssistant(): TeachingAssistant
+  }
+
+  class Teacher {
+    - position: TeacherPosition
+    - school: School
+    - ratingScores: List
+    --
+    +addLessonScore(student, offering, score): void
+    +setFinalExam(student, offering, score): void
+    +markAttendance(offering, date, student, present): void
+    +sendComplaint(students, urgency, reason): void
+    +generateCourseReport(offering): String
+    +printStudentJournal(student, offering): void
+  }
+
+  class Admin {
+    +addUser(user: User): void
+    +removeUser(user: User): void
+    +updateUser(user, name, email): void
+    +banUser(user: User): void
+    +unbanUser(user: User): void
+    +resetPassword(user: User): void
+    +viewLogs(): List
+    +viewSystemLogs(): List
+    +viewUserLogs(): List
+  }
+
+  abstract class Manager <<abstract>> {
+    - type: ManagerType
+    --
+    +approveRegistration(reg: CourseRegistration): void
+    +rejectRegistration(reg: CourseRegistration): void
+    +viewPendingRegistrations(): List
+    +createPerformanceReport(): String
+    +addNews(title, content, type): void
+    +viewSignedEmployeeRequests(): List
+  }
+
+  class ORManager {
+    +openSemester(semester: SemesterType): void
+    +closeSemester(): void
+    +approveOrgProposal(proposal): void
+    +rejectOrgProposal(proposal): void
+    +dissolveOrganization(org): void
+  }
+
+  class SchoolManager {
+    - school: School
+    --
+    +createCourseOffering(course, semester, max): CourseOffering
+    +assignHeadLecturer(offering, teacher): void
+    +addSlot(offering, slot): void
+    +publishOffering(offering): void
+    +addCourseToCatalog(...): Course
+    +assignTeachingAssistant(gs, offering, teacher): void
+    +viewStudentsBySchool(): List
+    +viewTeachersBySchool(): List
+  }
+
+  class Dean {
+    - school: School
+    --
+    +viewComplaints(): List
+    +signRequest(request: EmployeeRequest): void
+    +viewAllRequests(): List
+  }
+
+  class ResearchCoordinator {
+    +makeResearcher(user: User): ResearcherDecorator
+    +createProject(topic: String): ResearchProject
+    +printAllPapers(comparator): void
+    +getTopCitedResearcher(): ResearcherDecorator
+    +assignSupervisor(gs, supervisor): void
+    +addJournal(name, topic): Journal
+  }
+
+  class TechSupportSpecialist {
+    +viewRequests(): List
+    +getByStatus(status): List
+    +accept(request: Request): void
+    +reject(request: Request): void
+    +markDone(request: Request): void
+  }
+
+  class TeachingAssistant {
+    - graduateStudent: GraduateStudent
+    - offering: CourseOffering
+    - assistedTeacher: Teacher
+    --
+    +getAccessibleSlots(): List
+    +addLessonScore(student, score): void
+  }
 }
 
-enum GraduateDegree <<enumeration>> {
-  MASTER
-  PHD
+' ===================== ACADEMIC =====================
+
+package "kz.synapse.models — Academic" <<Rectangle>> {
+
+  class Course {
+    - courseCode: String
+    - name: String
+    - credits: int
+    - lecturesPerWeek: int
+    - practicesPerWeek: int
+    - defaultType: CourseType
+    - prerequisites: Set<Course>
+    --
+    +addPrerequisite(c: Course): void
+  }
+
+  class CourseOffering {
+    - course: Course
+    - semester: SemesterType
+    - targetSchool: School
+    - maxStudents: int
+    - enrolledStudents: Set<Student>
+    - slots: List<LessonSlot>
+    - marks: Map<Student, Mark>
+    - attendance: Attendance
+    - headLecturer: Teacher
+    --
+    +enrollStudent(student): void
+    +addSlot(slot: LessonSlot): void
+    +getOrCreateMark(student): Mark
+    +canSetFinalExam(teacher): boolean
+    +hasSpots(): boolean
+  }
+
+  class CourseRegistration {
+    - student: Student
+    - offering: CourseOffering
+    - status: RegistrationStatus
+    - createdAt: LocalDateTime
+    --
+    +approve(): void
+    +reject(): void
+  }
+
+  class LessonSlot {
+    - dayOfWeek: DayOfWeek
+    - startTime / endTime: LocalTime
+    - room: String
+    - type: LessonType
+    - teacher: Teacher
+    - enrolledStudents: Set<Student>
+    --
+    +enrollStudent(student): void
+    +overlapsWith(other): boolean
+    +hasSpots(): boolean
+  }
+
+  class LessonScore {
+    - date: LocalDate
+    - lessonType: LessonType
+    - period: AttestationPeriod
+    - score: double
+    - comment: String
+  }
+
+  class Mark {
+    - lessonScores: List<LessonScore>
+    - finalExam: double
+    --
+    +addLessonScore(score): void
+    +setFinalExam(score): void
+    +getAtt1() / getAtt2(): double
+    +getTotal(): double
+    +getLetterGrade(): String
+    +isPassed(): boolean
+    +printJournal(): void
+  }
+
+  class Transcript {
+    - student: Student
+    - records: Map<CourseOffering, Mark>
+    --
+    +addRecord(offering, mark): void
+    +calculateGpa(): double
+    +toString(): String
+  }
+
+  class Attendance {
+    - records: Map
+    --
+    +markPresent(date, student): void
+    +markAbsent(date, student): void
+    +getAttendanceRate(student): double
+  }
+
+  class Schedule {
+    - slots: List<LessonSlot>
+    --
+    +addSlot(slot): void
+    +hasRoomConflict(slot): boolean
+    +hasTeacherConflict(slot): boolean
+  }
 }
 
-enum TeacherPosition <<enumeration>> {
-  TUTOR
-  LECTOR
-  SENIOR_LECTOR
-  PROFESSOR
+' ===================== RESEARCH =====================
+
+package "kz.synapse.models — Research" <<Rectangle>> {
+
+  class ResearcherDecorator <<decorator>> {
+    - innerUser: T extends User
+    - papers: List<ResearchPaper>
+    - projects: List<ResearchProject>
+    --
+    +getInnerUser(): T
+    +publishPaper(paper): void
+    +calculateHIndex(): int
+    +joinProject(project): void
+  }
+
+  class ResearchPaper {
+    - title: String
+    - authors: String
+    - journal: String
+    - citations: int
+    - publishedDate: LocalDate
+    - doi: String
+    - pages: int
+    --
+    +getCitation(format: CitationFormat): String
+  }
+
+  class ResearchProject {
+    - topic: String
+    - participants: List<Researcher>
+    - publishedPapers: List<ResearchPaper>
+    --
+    +addParticipant(researcher): void
+    +addPublishedPaper(paper): void
+  }
+
+  class Journal <<subject>> {
+    - name: String
+    - topic: String
+    - subscribers: List<JournalObserver>
+    - papers: List<ResearchPaper>
+    --
+    +subscribe(observer): void
+    +unsubscribe(observer): void
+    +publish(paper: ResearchPaper): void
+  }
 }
 
+' ===================== COMMUNICATION =====================
 
-enum CourseType <<enumeration>> {
-  MAJOR
-  MINOR
-  FREE_ELECTIVE
+package "kz.synapse.models — Communication" <<Rectangle>> {
+
+  class Message {
+    - sender: Employee
+    - receiver: Employee
+    - text: String
+    - sentAt: LocalDateTime
+  }
+
+  class News {
+    - title: String
+    - content: String
+    - type: NewsType
+    - isPinned: boolean
+    - comments: List<String>
+  }
+
+  class Notification {
+    - text: String
+    - isRead: boolean
+    --
+    +markRead(): void
+  }
+
+  class Complaint {
+    - sender: Teacher
+    - aboutStudents: List<Student>
+    - urgency: UrgencyLevel
+    - reason: String
+  }
+
+  class Request {
+    - description: String
+    - status: RequestStatus
+    - requesterName: String
+    - createdAt: LocalDateTime
+    --
+    +setStatus(status): void
+  }
+
+  class EmployeeRequest {
+    - sender: Employee
+    - topic: String
+    - description: String
+    - signedByDean: boolean
+    --
+    +signByDean(dean: Dean): void
+  }
+
+  class StudentOrganization {
+    - name: String
+    - description: String
+    - members: List<Student>
+    - joinRequests: List<Student>
+    - head: Student
+    --
+    +requestJoin(student): void
+    +approveJoin(student): void
+    +transferLeadership(newHead): void
+  }
+
+  class OrganizationProposal {
+    - name: String
+    - description: String
+    - founder: Student
+    - status: String
+  }
+
+  class Event {
+    - type: EventType
+    - date: LocalDate
+    - description: String
+  }
 }
 
-enum LessonType <<enumeration>> {
-  LECTURE
-  PRACTICE
+' ===================== SERVICES & INFRA =====================
+
+package "kz.synapse.services" <<Rectangle>> {
+  class AuthService <<singleton>> {
+    - currentUserId: String
+    --
+    +getInstance(): AuthService
+    +login(email, password): User
+    +logout(): void
+    +getCurrentUser(): User
+    +invalidateSession(): void
+  }
+
+  class RegistrationService <<singleton>> {
+    {static} MAX_CREDITS_PER_SEMESTER = 21
+    --
+    +getInstance(): RegistrationService
+    +register(student, offering): void
+    +chooseSlot(student, offering, slot): void
+  }
+
+  class CourseStatistics {
+    +generateReport(offering): String
+    +getGradeDistribution(offering): Map
+  }
 }
 
-enum UrgencyLevel <<enumeration>> {
-  LOW
-  MEDIUM
-  HIGH
+package "kz.synapse.database" <<Rectangle>> {
+  class Database <<singleton>> {
+    - users, courses, offerings: List
+    - pendingRegistrations: List
+    - approvedRegistrations: List
+    - researchers: List
+    - papers, projects, journals: List
+    - newsList, techRequests: List
+    - organizations, orgProposals: List
+    - currentSemester: SemesterType
+    - isRegistrationOpen: boolean
+    - schedule: Schedule
+    --
+    +getInstance(): Database
+    +save(): void
+    +load(): void
+    +findByEmail(email): User
+    +getResearcherFor(user): ResearcherDecorator
+  }
 }
 
-enum RequestStatus <<enumeration>> {
-  NEW
-  VIEWED
-  ACCEPTED
-  REJECTED
-  DONE
+package "kz.synapse.factory" <<Rectangle>> {
+  class UserFactory <<factory>> {
+    {static} +createStudent(...): Student
+    {static} +createGraduateStudent(...): ResearcherDecorator
+    {static} +createTeacher(...): Teacher
+    {static} +createProfessor(...): ResearcherDecorator
+    {static} +createAdmin(...): Admin
+    {static} +createORManager(...): ORManager
+    {static} +createSchoolManager(...): SchoolManager
+    {static} +createDean(...): Dean
+    {static} +createTechSupport(...): TechSupportSpecialist
+    {static} +createResearchCoordinator(...): ResearchCoordinator
+    {static} +wrapAsResearcher(user): ResearcherDecorator
+  }
 }
 
-enum EventType <<enumeration>> {
-  EXAM
-  DEADLINE
-  MEETING
+package "kz.synapse.utils" <<Rectangle>> {
+  class LanguageManager <<singleton>> {
+    - currentLanguage: Language
+    - properties: Properties
+    --
+    +getInstance(): LanguageManager
+    +getString(key): String
+    +getString(key, args): String
+    +switchLanguage(lang): void
+  }
 }
 
-enum CitationFormat <<enumeration>> {
-  PLAIN_TEXT
-  BIBTEX
+package "kz.synapse.ui" <<Rectangle>> {
+  class Main {
+    +main(args): void
+    -routeToMenu(user): void
+  }
+  class ConsoleUtils <<utility>> {
+    +readInt(prompt): int
+    +readLine(prompt): String
+    +printHeader(key): void
+    +success(msg): void
+    +error(msg): void
+  }
+  class UIStrings <<utility>> {
+    {static} +get(key): String
+  }
 }
 
-enum Language <<enumeration>> {
-  KZ
-  EN
-  RU
+package "kz.synapse.ui.menus" <<Rectangle>> {
+  class AdminMenu
+  class StudentMenu
+  class TeacherMenu
+  class ORManagerMenu
+  class SchoolManagerMenu
+  class DeanMenu
+  class ResearchCoordinatorMenu
+  class ResearcherMenu
+  class TechSupportMenu
 }
 
-'STUDENTS
-
-class Student {
-  - credits: int
-  - gpa: double
-  - status: String
-  - school: School
-  + registerCourse(c: Course): void
-  + viewCourses(): void
-  + viewMarks(): void
-  + getTranscript(): void
-  + viewAttendance(): void
-  + viewSchedule(): void
-  + rateTeacher(t: Teacher, rating: int): void
-  + viewTeacherInfo(t: Teacher): void
-  + joinOrganization(): void
-  + subscribeToJournal(): void
+package "kz.synapse.exceptions" <<Rectangle>> {
+  class AuthenticationException <<exception>>
+  class UnauthorizedAccessException <<exception>>
+  class MaxCreditsException <<exception>>
+  class PrerequisiteNotMetException <<exception>>
+  class CourseFailLimitException <<exception>>
+  class LowHIndexException <<exception>>
+  class NotResearcherException <<exception>>
 }
 
-Student --> School : <<use>>
-
-class GraduateStudent {
-  - degree: GraduateDegree
-  - diplomaProjects: List
-}
-
-class TeachingAssistant {
-  - course: Course
-  + assistLesson(l: Lesson): void
-  + gradeHomework(): void
-}
-
-note right of GraduateStudent
-  Always wrapped in ResearcherDecorator.
-  Supervisor: Researcher (h-index >= 3).
-  TeachingAssistant role via composition.
-end note
-
-GraduateStudent --> GraduateDegree : <<use>>
-
-'  EMPLOYEES
-
-class Teacher {
-  - position: TeacherPosition
-  - rating: double
-  - school: School
-  + viewCourses(): void
-  + manageCourse(c: Course): void
-  + putMark(s: Student, m: Mark): void
-  + viewStudents(): void
-  + viewStudentInfo(s: Student): void
-  + sendComplaint(urgency: UrgencyLevel): void
-  + markAttendance(l: Lesson): void
-  + generateCourseReport(): String
-}
-
-Teacher --> TeacherPosition : <<use>>
-Teacher --> School : <<use>>
-
-
-class Admin {
-  + manageUsers(): void
-  + addUser(u: User): void
-  + removeUser(u: User): void
-  + updateUser(u: User): void
-  + viewLogs(): void
-  + banUser(u: User): void
-  + resetPassword(u: User): void
-  + manageRoles(u: User): void
-}
-
-abstract class Manager {
-  + approveRegistration(s: Student): void
-  + rejectRegistration(s: Student): void
-  + generateReport(): String
-  + manageNews(): void
-  + viewEmployeeRequests(): void
-}
-
-class SchoolManager {
-  - school: School
-  + assignCourse(t: Teacher, c: Course): void
-  + addCourse(c: Course, major: School, year: int): void
-  + viewStudentsBySchool(s: School): void
-  + viewTeachersBySchool(s: School): void
-}
-
-class RegistrarManager {
-  + viewStudentsSortedByGpa(): void
-  + viewStudentsSortedByName(): void
-}
-
-SchoolManager --> School : <<use>>
-
-class TechSupportSpecialist {
-  + viewRequests(): List
-  + accept(r: Request): void
-  + reject(r: Request): void
-  + done(r: Request): void
-}
-
-' RESEARCHER
-
-interface Researcher <<interface>> {
-  + calculateHIndex(): int
-  + printPapers(c: Comparator): void
-  + addPaper(p: ResearchPaper): void
-  + getProjects(): List
-}
-
-class ResearcherDecorator <<decorator>> {
-  - wrappedUser: User
-  - papers: List
-  - projects: List
-  - hIndex: int
-  + calculateHIndex(): int
-  + printPapers(c: Comparator): void
-  + addPaper(p: ResearchPaper): void
-  + getProjects(): List
-}
-
-class ResearchPaper {
-  - title: String
-  - authors: List
-  - journal: String
-  - citations: int
-  - date: String
-  - doi: String
-  - pages: int
-  + getCitation(f: CitationFormat): String
-}
-
-ResearchPaper --> CitationFormat : <<use>>
-
-class ResearchProject {
-  - topic: String
-  - participants: List
-  - publishedPapers: List
-  + addParticipant(u: User): void
-}
-
-' ACADEMIC
-
-class Course {
-  - name: String
-  - credits: int
-  - type: CourseType
-  - school: School
-  - year: int
-  - maxStudents: int
-  - prerequisites: List
-  + getCourseStatistics(): CourseStatistics
-}
-
-Course --> CourseType : <<use>>
-Course --> School : <<use>>
-
-class Lesson {
-  - type: LessonType
-  - date: String
-  - time: String
-  - room: String
-}
-
-Lesson --> LessonType : <<use>>
-
-class Mark {
-  - att1: double
-  - att2: double
-  - finalMark: double
-  + getTotal(): double
-  + getLetterGrade(): String
-  + isPassed(): boolean
-}
-
-class Schedule {
-  - entries: List
-  + addLesson(l: Lesson, day: String, room: String): void
-  + getByDay(d: String): List
-  + checkRoomConflict(): boolean
-}
-
-class Attendance {
-  - records: Map
-  + getAttendanceRate(): double
-  + markPresent(s: Student): void
-  + markAbsent(s: Student): void
-}
-
-class CourseStatistics {
-  - avgGpa: double
-  - passRate: double
-  - failRate: double
-  - topStudents: List
-  + generateReport(): String
-  + getGradeDistribution(): Map
-}
-
-' NEWS/JOURNAL - Observer Pattern
-
-interface JournalObserver <<interface>> {
-  + update(n: News): void
-}
-
-class Journal <<subject>> {
-  - topic: String
-  - comments: List
-  - observers: List
-  + addObserver(o: JournalObserver): void
-  + notifyObservers(n: News): void
-  + publish(n: News): void
-}
-
-class News {
-  - topic: String
-  - content: String
-  - isPinned: boolean
-  - comments: List
-}
-
-' MESSAGES, EVENTS, REQUESTS
-
-class Message {
-  - sender: User
-  - receiver: User
-  - text: String
-}
-
-class Complaint {
-  - urgency: UrgencyLevel
-  - toDean: boolean
-  - text: String
-}
-
-Complaint --> UrgencyLevel : <<use>>
-
-class Notification {
-  - text: String
-  - isRead: boolean
-}
-
-class Event {
-  - type: EventType
-  - date: String
-  - description: String
-}
-
-Event --> EventType : <<use>>
-
-class Request {
-  - description: String
-  - status: RequestStatus
-  - signedBy: String
-}
-
-Request --> RequestStatus : <<use>>
-
-class StudentOrganization {
-  - name: String
-  - members: List
-  - leader: Student
-}
-
-' INFRASTRUCTURE
-
-class Database <<singleton>> {
-  - instance: Database
-  - users: List
-  - courses: List
-  - papers: List
-  + getInstance(): Database
-  + save(): void
-  + load(): void
-}
-
-class UserFactory <<factory>> {
-  + createUser(role: String, school: School): User
-}
-
-UserFactory --> School : <<use>>
-
-class LanguageManager {
-  - language: Language
-  + getString(key: String): String
-  + switchLanguage(l: Language): void
-}
-
-LanguageManager --> Language : <<use>>
-
-' EXCEPTIONS
-
-class MaxCreditsException <<exception>>
-class LowHIndexException <<exception>>
-class NotResearcherException <<exception>>
-class AuthenticationException <<exception>>
-class CourseFailLimitException <<exception>>
-
-Student ..> MaxCreditsException : <<throw>>
-Student ..> CourseFailLimitException : <<throw>>
-ResearchProject ..> NotResearcherException : <<throw>>
-ResearcherDecorator ..> LowHIndexException : <<throw>>
-Database ..> AuthenticationException : <<throw>>
-
-' INHERITANCE
+' ===================== INHERITANCE =====================
 
 User <|-- Student
 User <|-- Employee
@@ -409,52 +618,86 @@ Student <|-- GraduateStudent
 Employee <|-- Teacher
 Employee <|-- Admin
 Employee <|-- Manager
-Manager <|-- SchoolManager
-Manager <|-- RegistrarManager
+Employee <|-- Dean
+Employee <|-- ResearchCoordinator
 Employee <|-- TechSupportSpecialist
+Manager <|-- ORManager
+Manager <|-- SchoolManager
 
-
-' REALIZATION
+' ===================== REALIZATION =====================
 
 Researcher <|.. ResearcherDecorator
 JournalObserver <|.. User
 
-' DECORATOR
+' ===================== KEY ASSOCIATIONS =====================
 
-ResearcherDecorator "1" o-- "1" User : wraps
+ResearcherDecorator "1" o-- "1" User : wraps >
+GraduateStudent "0..1" --> "1" Researcher : supervisor
+GraduateStudent "0..1" *-- "0..1" TeachingAssistant : optional TA role
 
-' COMPOSITION
+CourseOffering "1" --> "1" Course
+CourseOffering "1" *-- "0..*" LessonSlot
+CourseOffering "1" *-- "1" Attendance
+CourseOffering "1" o-- "0..*" Student : enrolled
+CourseOffering "1" o-- "0..1" Teacher : headLecturer
+CourseOffering "1" *-- "0..*" Mark : per student
 
-Course "1" *-- "1..*" Lesson
-Course "1" *-- "1" CourseStatistics
-Lesson "1" *-- "1" Attendance
-Student "1" *-- "0..*" Mark
-Journal "1" *-- "0..*" News
+CourseRegistration --> Student
+CourseRegistration --> CourseOffering
+CourseRegistration --> RegistrationStatus
+
+Mark "1" *-- "0..*" LessonScore
+Student "1" *-- "1" Transcript
+Transcript "1" o-- "0..*" Mark
+
+Journal "1" o-- "0..*" JournalObserver : subscribers
 ResearcherDecorator "1" *-- "0..*" ResearchPaper
-
-'  AGGREGATION — часть живёт отдельно
-
-ResearchProject "1" o-- "1..*" Researcher : participants
+ResearcherDecorator "1" o-- "0..*" ResearchProject
 ResearchProject "1" o-- "0..*" ResearchPaper
-Journal "1" o-- "0..*" JournalObserver
-TechSupportSpecialist "1" o-- "0..*" Request
+
+Student "0..*" -- "0..*" CourseOffering : registers via
+Teacher "1" -- "0..*" LessonSlot : teaches
+Message --> Employee : sender/receiver
+Complaint --> Teacher
+Complaint --> UrgencyLevel
+Request --> RequestStatus
+
 StudentOrganization "1" o-- "1..*" Student : members
+StudentOrganization "0..1" --> "1" Student : head
 
-' ASSOCIATION
+Database ..> User : stores
+Database ..> CourseOffering : stores
+UserFactory ..> User : creates
+RegistrationService ..> Database : uses
+AuthService ..> Database : uses
+Main ..> AuthService
+Main ..> AdminMenu : routes
 
-Student "0..*" -- "0..*" Course : registers
-Teacher "1..*" -- "0..*" Course : teaches
-GraduateStudent "0..*" --> "1" Researcher : supervisor
-GraduateStudent "1" o-- "0..1" TeachingAssistant : optional role
-UserFactory ..> ResearcherDecorator : <<create>>
-' DEPENDENCY
+RegistrationService ..> MaxCreditsException : throws
+RegistrationService ..> PrerequisiteNotMetException : throws
+RegistrationService ..> CourseFailLimitException : throws
+GraduateStudent ..> LowHIndexException : throws
+AuthService ..> AuthenticationException : throws
+AuthService ..> UnauthorizedAccessException : throws
 
-Database ..> User : <<use>>
-Database ..> Course : <<use>>
-Database ..> ResearchPaper : <<use>>
-UserFactory ..> User : <<create>>
+note right of CourseOffering
+  **Registration flow (2 steps):**
+  1. Student applies → PENDING
+  2. ORManager approves → APPROVED
+  3. Student picks LessonSlots → REGISTERED
+end note
 
-User "1" -- "0..*" Message : sends/receives
-User "1" -- "0..*" Notification : receives
+note right of ResearcherDecorator
+  **Decorator pattern:**
+  Professor and GraduateStudent
+  are wrapped to gain Researcher role.
+  Access via Database.getResearcherFor(user).
+end note
+
+note bottom of GraduateStudent
+  GraduateStudent uses StudentMenu in UI.
+  ResearcherMenu opens via ResearcherDecorator
+  (also from TeacherMenu if professor).
+end note
 
 @enduml

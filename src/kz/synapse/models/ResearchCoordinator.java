@@ -23,7 +23,7 @@ public class ResearchCoordinator extends Employee {
 
     // researchers
 
-    /** динамически назначает пользователю роль исследователя */
+    // динамически назначает пользователю роль исследователя
     public <T extends User> ResearcherDecorator<T> makeResearcher(T user) {
         ResearcherDecorator<T> decorator =
                 kz.synapse.factory.UserFactory.wrapAsResearcher(user);

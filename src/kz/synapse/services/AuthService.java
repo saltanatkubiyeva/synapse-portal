@@ -20,7 +20,6 @@ public class AuthService {
         return instance;
     }
 
-    /** сбросить сессию после load */
     public synchronized void invalidateSession() {
         currentUserId = null;
     }

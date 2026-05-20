@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/** декоратор оборачивает любого юзера */
 public class ResearcherDecorator<T extends User>
         implements Researcher, Serializable {
 
@@ -25,7 +24,7 @@ public class ResearcherDecorator<T extends User>
         this.innerUser = innerUser;
     }
 
-    /** вернуть внутреннего юзера */
+    // вернуть внутреннего юзера
     public T getInnerUser() {
         return innerUser;
     }
@@ -35,7 +34,7 @@ public class ResearcherDecorator<T extends User>
         return innerUser.getName();
     }
 
-    /** опубликовать статью */
+    // опубликовать статью
     @Override
     public void publishPaper(ResearchPaper paper) {
         papers.add(paper);

@@ -42,6 +42,7 @@ public class ORManagerMenu {
             System.out.println(LanguageManager.get("ui.menus.ORManagerMenu.11.manage.student.organizations"));
             System.out.println(LanguageManager.get("ui.menus.ORManagerMenu.12.send.tech.request"));
             System.out.println(LanguageManager.get("common.schedule.menuItem", "13"));
+            System.out.println("  14. Remove Course Offering");
             System.out.println("  " + UIStrings.get("msg.logout"));
             ConsoleUtils.printLine();
 
@@ -59,6 +60,7 @@ public class ORManagerMenu {
                 case 11 -> manageOrganizations();
                 case 12 -> sendTechRequest();
                 case 13 -> ConsoleUtils.viewSemesterSchedule();
+                case 14 -> removeCourseOffering();
                 case 0  -> { return; }
                 default -> System.out.println(UIStrings.get("msg.invalid"));
             }
@@ -317,4 +319,56 @@ public class ORManagerMenu {
         ConsoleUtils.success("Tech request submitted.");
         ConsoleUtils.pressEnter();
     }
+
+    private void removeCourseOffering() {
+        ConsoleUtils.clearScreen();
+        ConsoleUtils.printLine();
+        System.out.println("  REMOVE COURSE OFFERING");
+        ConsoleUtils.printLine();
+
+        java.util.List<CourseOffering> all =
+                new java.util.ArrayList<>(Database.getInstance().getCourseOfferings());
+        if (all.isEmpty()) {
+            System.out.println("  No offerings found.");
+            ConsoleUtils.pressEnter(); return;
+        }
+
+        for (int i = 0; i < all.size(); i++) {
+            CourseOffering o = all.get(i);
+            boolean published = Database.getInstance()
+                    .getPublishedOfferings().contains(o);
+            System.out.printf("  %d. %-8s %-35s [%s] %s | students: %d%n",
+                    i + 1,
+                    o.getCourse().getCourseCode(),
+                    o.getCourse().getName(),
+                    o.getSemester(),
+                    published ? "[PUBLISHED]" : "[draft]",
+                    o.getEnrolledStudents().size());
+        }
+        System.out.println("  0. Cancel");
+        ConsoleUtils.printLine();
+
+        int idx = ConsoleUtils.readInt("Select offering to remove: ");
+        if (idx == 0 || idx > all.size()) return;
+
+        CourseOffering target = all.get(idx - 1);
+
+        if (!target.getEnrolledStudents().isEmpty()) {
+            System.out.printf("  WARNING: %d student(s) enrolled. Remove anyway? (yes/no): ",
+                    target.getEnrolledStudents().size());
+            String confirm = ConsoleUtils.readLine("");
+            if (!confirm.equalsIgnoreCase("yes")) {
+                System.out.println("  Cancelled.");
+                ConsoleUtils.pressEnter(); return;
+            }
+        }
+
+        Database.getInstance().removeCourseOffering(target);
+        Database.getInstance().save();
+        ConsoleUtils.success("Offering removed: "
+                + target.getCourse().getName()
+                + " [" + target.getSemester() + "]");
+        ConsoleUtils.pressEnter();
+    }
+
 }

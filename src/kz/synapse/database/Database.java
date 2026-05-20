@@ -113,6 +113,11 @@ public class Database implements Serializable {
     public List<CourseOffering> getCourseOfferings()  { return Collections.unmodifiableList(courseOfferings); }
     public List<CourseOffering> getPublishedOfferings(){ return Collections.unmodifiableList(publishedOfferings); }
 
+    public void removeCourseOffering(CourseOffering o) {
+        courseOfferings.remove(o);
+        publishedOfferings.remove(o);
+    }
+
     public void addPendingRegistration(CourseRegistration r)    { pendingRegistrations.add(r); }
     public void removePendingRegistration(CourseRegistration r) { pendingRegistrations.remove(r); }
     public List<CourseRegistration> getPendingRegistrations()   { return Collections.unmodifiableList(pendingRegistrations); }

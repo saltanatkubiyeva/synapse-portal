@@ -175,7 +175,31 @@ public class TeacherMenu {
     private void viewCourseReport() {
         ConsoleUtils.clearScreen();
         CourseOffering offering = selectOffering(); if (offering == null) return;
+
+        // Оценки студентов
         System.out.println(teacher.generateCourseReport(offering));
+
+        // Статистика через CourseStatistics
+        kz.synapse.services.CourseStatistics stats =
+                new kz.synapse.services.CourseStatistics(offering);
+        ConsoleUtils.printLine();
+        System.out.printf("  Pass Rate:    %.1f%%%n", stats.getPassRate());
+        System.out.printf("  Fail Rate:    %.1f%%%n", stats.getFailRate());
+        System.out.printf("  Average GPA:  %.2f%n",  stats.getAvgGpa());
+        System.out.println("  Grade Distribution: " + stats.getGradeDistribution());
+
+        // Топ-3 студента
+        java.util.List<Student> top = stats.getTopStudents(3);
+        if (!top.isEmpty()) {
+            ConsoleUtils.printLine();
+            System.out.println("  Top Students:");
+            for (int i = 0; i < top.size(); i++) {
+                Mark m = offering.getMark(top.get(i));
+                System.out.printf("  %d. %-25s %.1f (%s)%n",
+                        i + 1, top.get(i).getName(),
+                        m.getTotal(), m.getLetterGrade());
+            }
+        }
         ConsoleUtils.pressEnter();
     }
 

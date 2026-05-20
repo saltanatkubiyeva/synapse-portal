@@ -141,6 +141,12 @@ public class StudentMenu {
 
         List<CourseOffering> approved = student.getEnrolledOfferings().stream()
                 .filter(o -> !student.slotsComplete(o))
+                // Исключаем офферинги уже со статусом REGISTERED
+                .filter(o -> kz.synapse.database.Database.getInstance()
+                        .getApprovedRegistrations().stream()
+                        .noneMatch(r -> r.getStudent().equals(student)
+                                && r.getOffering().equals(o)
+                                && r.getStatus() == kz.synapse.enums.RegistrationStatus.REGISTERED))
                 .collect(Collectors.toList());
 
         if (approved.isEmpty()) {
