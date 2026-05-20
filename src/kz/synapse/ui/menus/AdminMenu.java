@@ -112,12 +112,17 @@ public class AdminMenu {
         String name  = ConsoleUtils.readLine("Full Name (0=cancel): ");
         if (name.equals("0")) return;
         String email = ConsoleUtils.readLine("Email (@uni.kz): ");
+        if (email.equals("0")) return;
         String pass  = ConsoleUtils.readLine("Password: ");
+        if (pass.equals("0")) return;
         kz.synapse.enums.School school = selectSchool();
+        int year = ConsoleUtils.readInt("Year of study (1-4): ");
+        if (year < 1 || year > 4) year = 1;
         try {
-            UserFactory.createStudent(id, name, email, pass, kz.synapse.enums.Language.EN, school);
+            UserFactory.createStudent(id, name, email, pass,
+                    kz.synapse.enums.Language.EN, school, year);
             Database.getInstance().save();
-            ConsoleUtils.success("Student " + name + " created.");
+            ConsoleUtils.success("Student " + name + " (Year " + year + ") created.");
         } catch (Exception e) { ConsoleUtils.error(e.getMessage()); }
         ConsoleUtils.pressEnter();
     }
