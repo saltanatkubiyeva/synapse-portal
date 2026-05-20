@@ -39,6 +39,7 @@ public class SchoolManagerMenu {
             System.out.println(LanguageManager.get("ui.menus.SchoolManagerMenu.10.add.course.to.catalog"));
             System.out.println(LanguageManager.get("ui.menus.SchoolManagerMenu.11.assign.teaching.assistant"));
             System.out.println(LanguageManager.get("ui.menus.ORManagerMenu.12.send.tech.request"));
+            System.out.println(LanguageManager.get("common.schedule.menuItem", "13"));
             System.out.println("  " + UIStrings.get("msg.logout"));
             ConsoleUtils.printLine();
 
@@ -55,6 +56,7 @@ public class SchoolManagerMenu {
                 case 10 -> addCourseToCatalog();
                 case 11 -> assignTA();
                 case 12 -> sendTechRequest();
+                case 13 -> ConsoleUtils.viewSemesterSchedule();
                 case 0 -> { return; }
                 default -> System.out.println(UIStrings.get("msg.invalid"));
             }

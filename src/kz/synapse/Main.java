@@ -133,15 +133,71 @@ public class Main {
     private static void seedIfEmpty() {
         if (!Database.getInstance().getUsers().isEmpty()) return;
 
-        System.out.println(LanguageManager.get("setup.firstLaunch"));
-        UserFactory.createAdmin(
-                "admin-001", "Admin", "admin@uni.kz", "admin",
-                Language.EN
-        );
-        Database.getInstance().save();
-        System.out.println(LanguageManager.get("setup.defaultAdmin"));
-        System.out.println(LanguageManager.get("setup.addUsersHint"));
+        System.out.println("  First launch — creating test data...");
 
-        try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+        // ── Admin ─────────────────────────────────────────────────────
+        UserFactory.createAdmin(
+                "admin-001", "Admin", "admin@uni.kz", "admin", Language.EN);
+
+        // ── Students (Bachelor) ───────────────────────────────────────
+        UserFactory.createStudent("s-001", "Alua Kudaibergenova",
+                "al_kudaibergenova@uni.kz", "alua123", Language.EN,
+                kz.synapse.enums.School.SITE, 2);
+        UserFactory.createStudent("s-002", "Ingkar Farkhatkyzy",
+                "inko@uni.kz", "ingkar123", Language.EN,
+                kz.synapse.enums.School.SITE, 1);
+        UserFactory.createStudent("s-003", "Zhanel Kitarova",
+                "zh_kitarova@uni.kz", "zhanel123", Language.EN,
+                kz.synapse.enums.School.BS, 3);
+
+        // ── Graduate Student (MASTER) ─────────────────────────────────
+        // автоматически получает Researcher роль
+        UserFactory.createGraduateStudent("gs-001", "Elsa Yanke",
+                "e_yanke@uni.kz", "elsa123", Language.EN,
+                kz.synapse.enums.School.SITE,
+                kz.synapse.enums.GraduateDegree.MASTER);
+
+        // ── Teacher (Professor) ───────────────────────────────────────
+        // профессор автоматически получает Researcher роль
+        UserFactory.createProfessor("t-001", "Pakizar Shamoi",
+                "pakita@uni.kz", "pakizar123", Language.EN,
+                kz.synapse.enums.School.SITE);
+
+        // ── Research Coordinator ──────────────────────────────────────
+        UserFactory.createResearchCoordinator("rc-001", "Malika Imekeshova",
+                "r_c@uni.kz", "malika123", Language.EN);
+
+        // ── Tech Support ──────────────────────────────────────────────
+        UserFactory.createTechSupport("ts-001", "Damir Ten",
+                "t_c@uni.kz", "damir123", Language.EN);
+
+        // ── OR Manager ────────────────────────────────────────────────
+        UserFactory.createORManager("or-001", "Daneliya Kadyrbayeva",
+                "or@uni.kz", "daneliya123", Language.EN);
+
+        // ── School Manager (SITE) ─────────────────────────────────────
+        UserFactory.createSchoolManager("sm-001", "Aya Zhambyl",
+                "site@uni.kz", "aya123", Language.EN,
+                kz.synapse.enums.School.SITE);
+
+        // ── Dean (SITE) ───────────────────────────────────────────────
+        UserFactory.createDean("d-001", "Aidyn Aman",
+                "dean_site@uni.kz", "aidyn123", Language.EN,
+                kz.synapse.enums.School.SITE);
+
+        Database.getInstance().save();
+
+        System.out.println("  Test data created. Login credentials:");
+        System.out.println("  admin@uni.kz           / admin");
+        System.out.println("  al_kudaibergenova@uni.kz / alua123   (Student)");
+        System.out.println("  pakita@uni.kz          / pakizar123  (Teacher/Professor)");
+        System.out.println("  or@uni.kz              / daneliya123 (ORManager)");
+        System.out.println("  site@uni.kz            / aya123      (SchoolManager)");
+        System.out.println("  dean_site@uni.kz       / aidyn123    (Dean)");
+        System.out.println("  r_c@uni.kz             / malika123   (ResearchCoordinator)");
+        System.out.println("  t_c@uni.kz             / damir123    (TechSupport)");
+        System.out.println("  e_yanke@uni.kz         / elsa123     (GraduateStudent)");
+        System.out.println();
+        try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
     }
 }

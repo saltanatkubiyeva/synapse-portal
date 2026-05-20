@@ -29,6 +29,7 @@ public class DeanMenu {
             System.out.println(LanguageManager.get("ui.menus.DeanMenu.4.send.message"));
             System.out.println(LanguageManager.get("ui.menus.DeanMenu.5.view.messages"));
             System.out.println(LanguageManager.get("ui.menus.DeanMenu.6.submit.official.request"));
+            System.out.println(LanguageManager.get("common.schedule.menuItem", "7"));
             System.out.println("  " + UIStrings.get("msg.logout"));
             ConsoleUtils.printLine();
 
@@ -39,6 +40,7 @@ public class DeanMenu {
                 case 4 -> sendMessage();
                 case 5 -> viewMessages();
                 case 6 -> submitRequest();
+                case 7 -> ConsoleUtils.viewSemesterSchedule();
                 case 0 -> { return; }
                 default -> System.out.println(UIStrings.get("msg.invalid"));
             }

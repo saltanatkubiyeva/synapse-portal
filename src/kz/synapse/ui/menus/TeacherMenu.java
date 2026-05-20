@@ -45,6 +45,7 @@ public class TeacherMenu {
             if (researcher != null)
                 System.out.println(LanguageManager.get("ui.menus.TeacherMenu.11.researcher.menu"));
             System.out.println(LanguageManager.get("ui.menus.ORManagerMenu.12.send.tech.request"));
+            System.out.println(LanguageManager.get("common.schedule.menuItem", "13"));
             System.out.println("  " + UIStrings.get("msg.logout"));
             ConsoleUtils.printLine();
 
@@ -62,6 +63,7 @@ public class TeacherMenu {
                 case 10 -> viewNotifications();
                 case 11 -> { if (researcher != null) new ResearcherMenu(researcher).show(); }
                 case 12 -> sendTechRequest();
+                case 13 -> ConsoleUtils.viewSemesterSchedule();
                 case 0  -> { return; }
                 default -> System.out.println(UIStrings.get("msg.invalid"));
             }

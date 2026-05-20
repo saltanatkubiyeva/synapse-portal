@@ -71,4 +71,60 @@ public class ConsoleUtils {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
+
+    /**
+     * Показывает расписание всех дисциплин текущего семестра.
+     * Доступно всем ролям кроме Admin и TechSupport.
+     * Группирует по дисциплине, показывает все слоты.
+     */
+    public static void viewSemesterSchedule() {
+        kz.synapse.database.Database db = kz.synapse.database.Database.getInstance();
+        kz.synapse.utils.LanguageManager lm = kz.synapse.utils.LanguageManager.getInstance();
+        clearScreen();
+        printLine();
+        String sem = db.getCurrentSemester() != null
+                ? db.getCurrentSemester().toString()
+                : lm.get("common.schedule.noSemester");
+        System.out.println(lm.get("common.schedule.title", sem));
+        printLine();
+
+        java.util.List<kz.synapse.models.CourseOffering> offerings =
+                db.getPublishedOfferings().stream()
+                        .filter(o -> o.getSemester() == db.getCurrentSemester())
+                        .collect(java.util.stream.Collectors.toList());
+
+        if (offerings.isEmpty()) {
+            System.out.println(lm.get("common.schedule.noPublished"));
+            pressEnter();
+            return;
+        }
+
+        for (kz.synapse.models.CourseOffering o : offerings) {
+            System.out.printf("%n  %-8s %-30s | %d/%d seats | Head: %s%n",
+                    o.getCourse().getCourseCode(),
+                    o.getCourse().getName(),
+                    o.getEnrolledStudents().size(),
+                    o.getMaxStudents(),
+                    o.getHeadLecturer() != null ? o.getHeadLecturer().getName() : "—");
+
+            java.util.List<kz.synapse.models.LessonSlot> slots = o.getSlots();
+            if (slots.isEmpty()) {
+                System.out.println(lm.get("common.schedule.noSlots"));
+            } else {
+                slots.stream()
+                        .sorted(java.util.Comparator
+                                .comparing(kz.synapse.models.LessonSlot::getDayOfWeek)
+                                .thenComparing(kz.synapse.models.LessonSlot::getStartTime))
+                        .forEach(s -> System.out.printf(
+                                "    [%-8s] %-9s %s–%s | Room: %-6s | %s | %d/%d%n",
+                                s.getType(), s.getDayOfWeek(),
+                                s.getStartTime(), s.getEndTime(),
+                                s.getRoom(), s.getTeacher().getName(),
+                                s.getCurrentStudents(), s.getMaxStudents()));
+            }
+        }
+        printLine();
+        pressEnter();
+    }
+
 }

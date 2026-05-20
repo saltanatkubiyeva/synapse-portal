@@ -195,9 +195,12 @@ public class AdminMenu {
         ConsoleUtils.clearScreen();
         System.out.println(LanguageManager.get("ui.menus.AdminMenu.add.teacher")); ConsoleUtils.printLine();
         String id    = UUID.randomUUID().toString().substring(0, 8);
-        String name  = ConsoleUtils.readLine("Full Name: ");
+        String name  = ConsoleUtils.readLine("Full Name (0=cancel): ");
+        if (name.equals("0")) return;
         String email = ConsoleUtils.readLine("Email: ");
+        if (email.equals("0")) return;
         String pass  = ConsoleUtils.readLine("Password: ");
+        if (pass.equals("0")) return;
         kz.synapse.enums.School school = selectSchool();
         System.out.println(LanguageManager.get("ui.menus.AdminMenu.position.1.tutor.2.lector.3.senior.lector.4.profes"));
         kz.synapse.enums.TeacherPosition pos = switch (ConsoleUtils.readInt("Choice: ")) {
@@ -221,9 +224,12 @@ public class AdminMenu {
         ConsoleUtils.clearScreen();
         System.out.println(LanguageManager.get("ui.menus.AdminMenu.add.or.manager")); ConsoleUtils.printLine();
         String id = UUID.randomUUID().toString().substring(0, 8);
-        String name = ConsoleUtils.readLine("Full Name: ");
+        String name = ConsoleUtils.readLine("Full Name (0=cancel): ");
+        if (name.equals("0")) return;
         String email = ConsoleUtils.readLine("Email: ");
+        if (email.equals("0")) return;
         String pass = ConsoleUtils.readLine("Password: ");
+        if (pass.equals("0")) return;
         try {
             UserFactory.createORManager(id, name, email, pass, kz.synapse.enums.Language.EN);
             Database.getInstance().save();
@@ -236,9 +242,12 @@ public class AdminMenu {
         ConsoleUtils.clearScreen();
         System.out.println(LanguageManager.get("ui.menus.AdminMenu.add.school.manager")); ConsoleUtils.printLine();
         String id = UUID.randomUUID().toString().substring(0, 8);
-        String name = ConsoleUtils.readLine("Full Name: ");
+        String name = ConsoleUtils.readLine("Full Name (0=cancel): ");
+        if (name.equals("0")) return;
         String email = ConsoleUtils.readLine("Email: ");
+        if (email.equals("0")) return;
         String pass = ConsoleUtils.readLine("Password: ");
+        if (pass.equals("0")) return;
         kz.synapse.enums.School school = selectSchool();
         try {
             UserFactory.createSchoolManager(id, name, email, pass, kz.synapse.enums.Language.EN, school);
@@ -252,9 +261,12 @@ public class AdminMenu {
         ConsoleUtils.clearScreen();
         System.out.println(LanguageManager.get("ui.menus.AdminMenu.add.tech.support")); ConsoleUtils.printLine();
         String id = UUID.randomUUID().toString().substring(0, 8);
-        String name = ConsoleUtils.readLine("Full Name: ");
+        String name = ConsoleUtils.readLine("Full Name (0=cancel): ");
+        if (name.equals("0")) return;
         String email = ConsoleUtils.readLine("Email: ");
+        if (email.equals("0")) return;
         String pass = ConsoleUtils.readLine("Password: ");
+        if (pass.equals("0")) return;
         try {
             UserFactory.createTechSupport(id, name, email, pass, kz.synapse.enums.Language.EN);
             Database.getInstance().save();
@@ -267,9 +279,12 @@ public class AdminMenu {
         ConsoleUtils.clearScreen();
         System.out.println(LanguageManager.get("ui.menus.AdminMenu.add.research.coordinator")); ConsoleUtils.printLine();
         String id = UUID.randomUUID().toString().substring(0, 8);
-        String name = ConsoleUtils.readLine("Full Name: ");
+        String name = ConsoleUtils.readLine("Full Name (0=cancel): ");
+        if (name.equals("0")) return;
         String email = ConsoleUtils.readLine("Email: ");
+        if (email.equals("0")) return;
         String pass = ConsoleUtils.readLine("Password: ");
+        if (pass.equals("0")) return;
         try {
             UserFactory.createResearchCoordinator(id, name, email, pass, kz.synapse.enums.Language.EN);
             Database.getInstance().save();
@@ -301,6 +316,12 @@ public class AdminMenu {
         int idx = ConsoleUtils.readInt("User # to remove (0=cancel): ");
         if (idx < 1 || idx > users.size()) return;
         User target = users.get(idx - 1);
+        // защита: нельзя удалить Admin
+        if (target instanceof Admin) {
+            ConsoleUtils.error("Cannot remove an Admin account.");
+            ConsoleUtils.pressEnter();
+            return;
+        }
         admin.removeUser(target);
         Database.getInstance().save();
         ConsoleUtils.success(target.getName() + " removed.");

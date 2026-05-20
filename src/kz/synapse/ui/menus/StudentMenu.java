@@ -39,6 +39,7 @@ public class StudentMenu {
             System.out.println(LanguageManager.get("ui.menus.ORManagerMenu.12.send.tech.request"));
             if (student instanceof GraduateStudent gs && gs.isTA())
                 System.out.println(LanguageManager.get("ui.menus.StudentMenu.13.teaching.assistant.menu"));
+            System.out.println(LanguageManager.get("common.schedule.menuItem", "14"));
             System.out.println("  " + UIStrings.get("msg.logout"));
             ConsoleUtils.printLine();
 
@@ -59,6 +60,7 @@ public class StudentMenu {
                     if (student instanceof GraduateStudent gs && gs.isTA())
                         showTAMenu(gs.getTeachingAssistant());
                 }
+                case 14 -> ConsoleUtils.viewSemesterSchedule();
                 case 0  -> { return; }
                 default -> System.out.println(UIStrings.get("msg.invalid"));
             }

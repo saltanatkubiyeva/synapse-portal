@@ -41,6 +41,7 @@ public class ORManagerMenu {
             System.out.println(LanguageManager.get("ui.menus.ORManagerMenu.10.publish.university.news"));
             System.out.println(LanguageManager.get("ui.menus.ORManagerMenu.11.manage.student.organizations"));
             System.out.println(LanguageManager.get("ui.menus.ORManagerMenu.12.send.tech.request"));
+            System.out.println(LanguageManager.get("common.schedule.menuItem", "13"));
             System.out.println("  " + UIStrings.get("msg.logout"));
             ConsoleUtils.printLine();
 
@@ -57,6 +58,7 @@ public class ORManagerMenu {
                 case 10 -> publishNews();
                 case 11 -> manageOrganizations();
                 case 12 -> sendTechRequest();
+                case 13 -> ConsoleUtils.viewSemesterSchedule();
                 case 0  -> { return; }
                 default -> System.out.println(UIStrings.get("msg.invalid"));
             }

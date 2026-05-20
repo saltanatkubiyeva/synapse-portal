@@ -44,6 +44,7 @@ public class ResearchCoordinatorMenu {
             System.out.println(LanguageManager.get("ui.menus.ResearchCoordinatorMenu.13.add.paper.to.research.project"));
             System.out.println(LanguageManager.get("ui.menus.ResearchCoordinatorMenu.14.send.message"));
             System.out.println(LanguageManager.get("ui.menus.ResearchCoordinatorMenu.15.send.tech.request"));
+            System.out.println(LanguageManager.get("common.schedule.menuItem", "16"));
             System.out.println("  " + UIStrings.get("msg.logout"));
             ConsoleUtils.printLine();
 
@@ -68,6 +69,7 @@ public class ResearchCoordinatorMenu {
                 case 13 -> addPaperToProject();
                 case 14 -> sendMessage();
                 case 15 -> sendTechRequest();
+                case 16 -> ConsoleUtils.viewSemesterSchedule();
                 case 0  -> { return; }
                 default -> System.out.println(UIStrings.get("msg.invalid"));
             }

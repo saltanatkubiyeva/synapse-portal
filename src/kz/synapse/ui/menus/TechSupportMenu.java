@@ -1,7 +1,5 @@
 package kz.synapse.ui.menus;
 
-import kz.synapse.utils.LanguageManager;
-
 import kz.synapse.database.Database;
 import kz.synapse.enums.RequestStatus;
 import kz.synapse.models.*;
@@ -24,16 +22,16 @@ public class TechSupportMenu {
             long newCount = Database.getInstance().getTechRequests().stream()
                     .filter(r -> r.getStatus() == RequestStatus.NEW).count();
             if (newCount > 0)
-                System.out.println(LanguageManager.get("techsupport.newRequests", newCount));
+                System.out.println("  ⚠ NEW REQUESTS: " + newCount);
             ConsoleUtils.printLine();
-            System.out.println(LanguageManager.get("ui.menus.TechSupportMenu.1.view.all.requests"));
-            System.out.println(LanguageManager.get("ui.menus.TechSupportMenu.2.view.new.requests"));
-            System.out.println(LanguageManager.get("ui.menus.TechSupportMenu.3.view.accepted.requests"));
-            System.out.println(LanguageManager.get("ui.menus.TechSupportMenu.4.accept.request"));
-            System.out.println(LanguageManager.get("ui.menus.TechSupportMenu.5.reject.request"));
-            System.out.println(LanguageManager.get("ui.menus.TechSupportMenu.6.mark.as.done"));
-            System.out.println(LanguageManager.get("ui.menus.TechSupportMenu.7.send.message"));
-            System.out.println(LanguageManager.get("ui.menus.TeacherMenu.8.view.messages"));
+            System.out.println("  1. View All Requests");
+            System.out.println("  2. View New Requests");
+            System.out.println("  3. View Accepted Requests");
+            System.out.println("  4. Accept Request");
+            System.out.println("  5. Reject Request");
+            System.out.println("  6. Mark as Done");
+            System.out.println("  7. Send Message");
+            System.out.println("  8. View Messages");
             System.out.println("  " + UIStrings.get("msg.logout"));
             ConsoleUtils.printLine();
 
@@ -71,9 +69,9 @@ public class TechSupportMenu {
 
     private void changeStatus(RequestStatus newStatus) {
         ConsoleUtils.clearScreen();
-        System.out.println(LanguageManager.get("techsupport.requestStatus", newStatus)); ConsoleUtils.printLine();
+        System.out.println("  " + newStatus + " REQUEST"); ConsoleUtils.printLine();
         List<Request> all = tech.viewRequests();
-        // фильтруем по логике: accept/reject → VIEWED, done → ACCEPTED
+        // Фильтруем по логике: accept/reject → VIEWED, done → ACCEPTED
         List<Request> eligible = all.stream()
                 .filter(r -> {
                     if (newStatus == RequestStatus.ACCEPTED || newStatus == RequestStatus.REJECTED)
@@ -84,7 +82,7 @@ public class TechSupportMenu {
                 })
                 .collect(java.util.stream.Collectors.toList());
 
-        if (eligible.isEmpty()) { System.out.println(LanguageManager.get("ui.menus.TechSupportMenu.no.eligible.requests")); ConsoleUtils.pressEnter(); return; }
+        if (eligible.isEmpty()) { System.out.println("No eligible requests."); ConsoleUtils.pressEnter(); return; }
         for (int i = 0; i < eligible.size(); i++)
             System.out.printf("  %d. [%s] %s — %s%n", i + 1,
                     eligible.get(i).getStatus(),
@@ -106,7 +104,7 @@ public class TechSupportMenu {
 
     private void sendMessage() {
         ConsoleUtils.clearScreen();
-        System.out.println(LanguageManager.get("common.sendMessage.title")); ConsoleUtils.printLine();
+        System.out.println("  SEND MESSAGE"); ConsoleUtils.printLine();
         List<Employee> employees = Database.getInstance().getUsers().stream()
                 .filter(u -> u instanceof Employee && !u.equals(tech))
                 .map(u -> (Employee) u)
@@ -125,9 +123,9 @@ public class TechSupportMenu {
     private void viewMessages() {
         ConsoleUtils.clearScreen();
         ConsoleUtils.printLine();
-        System.out.println(LanguageManager.get("common.inbox.title")); ConsoleUtils.printLine();
+        System.out.println("  INBOX"); ConsoleUtils.printLine();
         List<Message> msgs = tech.getUnreadMessages();
-        if (msgs.isEmpty()) System.out.println(LanguageManager.get("common.inbox.empty"));
+        if (msgs.isEmpty()) System.out.println("  No new messages.");
         else msgs.forEach(m -> System.out.println("  " + m));
         ConsoleUtils.pressEnter();
     }
